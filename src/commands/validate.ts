@@ -1,8 +1,9 @@
+import { Command } from 'commander';
 import chalk from 'chalk';
 import { configManager } from '../config.js';
 import { validateAllWorkflows } from '../workflow-manager.js';
 
-export async function validateCommand(): Promise<void> {
+export async function validateCommandHandler(): Promise<void> {
   console.log(chalk.bold('Validating workflow files...\n'));
   
   const projectRoot = configManager.getProjectRoot();
@@ -21,16 +22,22 @@ export async function validateCommand(): Promise<void> {
     });
   }
   
-  if (results.valid > 0) {
-    console.log(chalk.green(`✓ ${results.valid} workflow(s) validated successfully`));
+  if (results.valid.length > 0) {
+    console.log(chalk.green(`✓ ${results.valid.length} workflow(s) validated successfully`));
   }
   
   console.log('');
   console.log(chalk.bold('Summary:'));
-  console.log(`  ${chalk.green('Valid:')} ${results.valid}`);
+  console.log(`  ${chalk.green('Valid:')} ${results.valid.length}`);
   console.log(`  ${chalk.red('Invalid:')} ${results.invalid.length}`);
   
   if (results.invalid.length > 0) {
     process.exit(1);
   }
 }
+
+export const validateCommand = new Command('validate')
+  .description('Validate all workflow files for syntax and structure')
+  .action(async () => {
+    await validateCommandHandler();
+  });

@@ -1,6 +1,8 @@
+import { Command } from 'commander';
 import ora from 'ora';
 import chalk from 'chalk';
 import path from 'path';
+import fs from 'fs';
 import { N8nClient } from '../api-client.js';
 import { configManager } from '../config.js';
 import { loadWorkflowFromFile, findWorkflowFiles } from '../workflow-manager.js';
@@ -102,7 +104,7 @@ async function deployWorkflow(
   }
 }
 
-export async function deployCommand(options: DeployOptions): Promise<void> {
+export async function deployCommandHandler(options: DeployOptions): Promise<void> {
   const spinner = ora('Loading configuration...').start();
   
   try {
@@ -209,3 +211,19 @@ export async function deployCommand(options: DeployOptions): Promise<void> {
     process.exit(1);
   }
 }
+
+export const deployCommand = new Command('deploy')
+  .description('Deploy workflows to an n8n environment')
+  .argument('<environment>', 'Target environment (dev, staging, prod)')
+  .argument('[workflow]', 'Specific workflow file to deploy (optional)')
+  .option('--dry-run', 'Preview changes without applying them')
+  .option('--parallel', 'Deploy workflows in parallel for faster execution')
+  .action(async (environment: string, workflow?: string, options?: any) => {
+    const deployOptions: DeployOptions = {
+      environment,
+      workflow,
+      dryRun: options?.dryRun || false,
+      parallel: options?.parallel || false,
+    };
+    await deployCommandHandler(deployOptions);
+  });

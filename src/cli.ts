@@ -1,93 +1,64 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import chalk from 'chalk';
-import { pullCommand } from './commands/pull.js';
+import fs from 'fs';
+import path from 'path';
 import { deployCommand } from './commands/deploy.js';
 import { executeCommand } from './commands/execute.js';
 import { listCommand } from './commands/list.js';
+import { pullCommand } from './commands/pull.js';
 import { validateCommand } from './commands/validate.js';
 
 const program = new Command();
 
 program
   .name('n8n-workflows')
-  .description('CLI tool for managing n8n workflows with source control')
+  .description('CLI tool for managing n8n workflows across environments')
   .version('1.0.0');
 
+// Add helpful information about configuration
 program
-  .command('pull')
-  .description('Pull workflows from n8n instance to local repository')
-  .argument('[environment]', 'Environment name (test, production, etc.)', 'test')
-  .option('-c, --category <category>', 'Filter by category (business, management, shared)')
-  .action(async (environment, options) => {
-    await pullCommand({
-      environment,
-      category: options.category,
-    });
+  .hook('preAction', () => {
+    // Check if config exists
+    const configPath = path.join(process.cwd(), '.n8n-cli.config.json');
+    if (!fs.existsSync(configPath)) {
+      console.log('ℹ️  Configuration file .n8n-cli.config.json not found in current directory.');
+      console.log('   Create one with your n8n environment settings to get started.');
+      console.log('   See documentation: https://github.com/your-org/n8n-workflow-cli#configuration');
+      console.log('');
+    }
   });
 
+program.addCommand(deployCommand);
+program.addCommand(executeCommand);
+program.addCommand(listCommand);
+program.addCommand(pullCommand);
+program.addCommand(validateCommand);
+
+// Enhanced help with examples
 program
-  .command('deploy')
-  .description('Deploy workflows from repository to n8n instance')
-  .argument('[environment]', 'Environment name (test, production, etc.)', 'test')
-  .argument('[target]', 'What to deploy: all, category name, or specific workflow file path')
-  .option('--dry-run', 'Preview changes without deploying')
-  .option('--parallel', 'Deploy workflows in parallel (faster but less control)')
-  .action(async (environment, target, options) => {
-    await deployCommand({
-      environment,
-      target,
-      dryRun: options.dryRun,
-      parallel: options.parallel,
-    });
-  });
+  .addHelpText('after', `
+Examples:
+  $ n8n-workflows pull dev                    # Pull workflows from dev environment
+  $ n8n-workflows validate                    # Validate all workflow files
+  $ n8n-workflows deploy prod workflow.json   # Deploy specific workflow to prod
+  $ n8n-workflows deploy prod --dry-run       # Test deployment without changes
+  $ n8n-workflows list --remote prod          # List workflows in prod environment
 
-program
-  .command('execute')
-  .description('Execute a workflow immediately (useful for management workflows)')
-  .argument('<workflow>', 'Workflow name or ID')
-  .argument('[environment]', 'Environment name (test, production, etc.)', 'test')
-  .option('-w, --wait', 'Wait for execution to complete')
-  .action(async (workflow, environment, options) => {
-    await executeCommand({
-      workflow,
-      environment,
-      wait: options.wait,
-    });
-  });
-
-program
-  .command('list')
-  .description('List workflows in repository and optionally on remote')
-  .argument('[environment]', 'Environment name for remote listing', 'test')
-  .option('-r, --remote', 'Also list workflows on remote n8n instance')
-  .action(async (environment, options) => {
-    await listCommand({
-      environment,
-      remote: options.remote,
-    });
-  });
-
-program
-  .command('validate')
-  .description('Validate all workflow JSON files')
-  .action(async () => {
-    await validateCommand();
-  });
-
-// Error handling
-program.exitOverride();
-
-try {
-  await program.parseAsync(process.argv);
-} catch (error) {
-  if (error instanceof Error && error.message.includes('outputHelp')) {
-    // Commander help was shown, exit normally
-    process.exit(0);
+Configuration:
+  Create .n8n-cli.config.json in your project root:
+  {
+    "environments": {
+      "dev": {
+        "baseUrl": "https://n8n.dev.company.com",
+        "apiKey": "\${N8N_DEV_API_KEY}"
+      }
+    },
+    "workflowsDir": "./workflows",
+    "categories": ["business", "management", "shared"]
   }
-  
-  console.error(chalk.red('\nAn unexpected error occurred:'));
-  console.error(error);
-  process.exit(1);
-}
+
+For more information, visit: https://github.com/your-org/n8n-workflow-cli
+`);
+
+program.parse();

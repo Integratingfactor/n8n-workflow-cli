@@ -1,10 +1,11 @@
+import { Command } from 'commander';
 import ora from 'ora';
 import chalk from 'chalk';
 import { N8nClient } from '../api-client.js';
 import { configManager } from '../config.js';
 import { ExecuteOptions } from '../types.js';
 
-export async function executeCommand(options: ExecuteOptions): Promise<void> {
+export async function executeCommandHandler(options: ExecuteOptions): Promise<void> {
   const spinner = ora('Loading configuration...').start();
   
   try {
@@ -67,3 +68,17 @@ export async function executeCommand(options: ExecuteOptions): Promise<void> {
     process.exit(1);
   }
 }
+
+export const executeCommand = new Command('execute')
+  .description('Execute a workflow on n8n')
+  .argument('<environment>', 'Target environment')
+  .argument('<workflow>', 'Workflow name or ID to execute')
+  .option('--wait', 'Wait for execution to complete')
+  .action(async (environment: string, workflow: string, options?: any) => {
+    const executeOptions: ExecuteOptions = {
+      environment,
+      workflow,
+      wait: options?.wait || false,
+    };
+    await executeCommandHandler(executeOptions);
+  });
