@@ -1,3 +1,4 @@
+import { Command } from 'commander';
 import ora from 'ora';
 import chalk from 'chalk';
 import { N8nClient } from '../api-client.js';
@@ -5,7 +6,7 @@ import { configManager } from '../config.js';
 import { findWorkflowFiles, loadWorkflowFromFile } from '../workflow-manager.js';
 import { ListOptions } from '../types.js';
 
-export async function listCommand(options: ListOptions): Promise<void> {
+export async function listCommandHandler(options: ListOptions): Promise<void> {
   const projectRoot = configManager.getProjectRoot();
   
   // List local workflows
@@ -49,7 +50,7 @@ export async function listCommand(options: ListOptions): Promise<void> {
   }
   
   // List remote workflows if requested
-  if (options.remote) {
+  if (options.remote && options.environment) {
     const spinner = ora('Loading remote workflows...').start();
     
     try {
@@ -91,3 +92,14 @@ export async function listCommand(options: ListOptions): Promise<void> {
     console.log(chalk.dim('Use --remote flag to also list remote workflows'));
   }
 }
+
+export const listCommand = new Command('list')
+  .description('List local and remote workflows')
+  .option('--remote <environment>', 'Also list workflows from remote environment')
+  .action(async (options?: any) => {
+    const listOptions: ListOptions = {
+      environment: options?.remote,
+      remote: !!options?.remote,
+    };
+    await listCommandHandler(listOptions);
+  });

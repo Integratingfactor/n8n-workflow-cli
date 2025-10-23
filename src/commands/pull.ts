@@ -1,3 +1,4 @@
+import { Command } from 'commander';
 import ora from 'ora';
 import chalk from 'chalk';
 import { N8nClient } from '../api-client.js';
@@ -5,7 +6,7 @@ import { configManager } from '../config.js';
 import { saveWorkflowToFile, determineCategory } from '../workflow-manager.js';
 import { PullOptions } from '../types.js';
 
-export async function pullCommand(options: PullOptions): Promise<void> {
+export async function pullCommandHandler(options: PullOptions): Promise<void> {
   const spinner = ora('Loading configuration...').start();
   
   try {
@@ -73,3 +74,15 @@ export async function pullCommand(options: PullOptions): Promise<void> {
     process.exit(1);
   }
 }
+
+export const pullCommand = new Command('pull')
+  .description('Pull workflows from n8n environment')
+  .argument('<environment>', 'Source environment')
+  .option('--category <category>', 'Only pull workflows from specific category')
+  .action(async (environment: string, options?: any) => {
+    const pullOptions: PullOptions = {
+      environment,
+      category: options?.category,
+    };
+    await pullCommandHandler(pullOptions);
+  });

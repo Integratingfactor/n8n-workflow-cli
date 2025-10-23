@@ -89,6 +89,7 @@ export const WORKFLOW_CATEGORIES: WorkflowCategory[] = ['business', 'management'
 export interface DeployOptions {
   environment: string;
   target?: string;
+  workflow?: string;
   dryRun?: boolean;
   parallel?: boolean;
 }
@@ -105,6 +106,6 @@ export interface ExecuteOptions {
 }
 
 export interface ListOptions {
-  environment: string;
+  environment?: string;
   remote?: boolean;
 }
