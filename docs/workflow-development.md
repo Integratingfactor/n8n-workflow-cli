@@ -4,7 +4,7 @@ This guide provides best practices and guidelines for developing n8n workflows.
 
 ## Quick Start
 
-> 📖 **New to this tool?** See the detailed [Quick Start Guide](QUICKSTART.md) for step-by-step instructions.
+> 📖 **New to this tool?** See the detailed [Quick Start Guide](README.md) for step-by-step instructions.
 
 1. **Create configuration** - Create `n8n.config.json` in your workflow repository:
 ```json
