@@ -8,6 +8,17 @@ import { configManager } from '../config.js';
 import { loadWorkflowFromFile, findWorkflowFiles } from '../workflow-manager.js';
 import { DeployOptions } from '../types.js';
 
+/**
+ * Remove read-only fields from workflow before saving to file
+ * These fields are managed by n8n and cause unnecessary diffs in source control
+ */
+function cleanWorkflowForSaving(workflow: any): any {
+  const fieldsToRemove = ['createdAt', 'updatedAt', 'versionId', 'isArchived'];
+  const cleaned = { ...workflow };
+  fieldsToRemove.forEach((field) => delete cleaned[field]);
+  return cleaned;
+}
+
 async function deployWorkflow(
   client: N8nClient,
   filePath: string,
@@ -68,7 +79,8 @@ async function deployWorkflow(
           // Update local file with new ID
           workflow.id = created.id;
           const fs = await import('fs/promises');
-          await fs.writeFile(filePath, JSON.stringify(workflow, null, 2) + '\n', 'utf-8');
+          const cleanedWorkflow = cleanWorkflowForSaving(workflow);
+          await fs.writeFile(filePath, JSON.stringify(cleanedWorkflow, null, 2) + '\n', 'utf-8');
 
           // Update workflow tags if they exist
           if (workflow.tags && workflow.tags.length > 0 && created.id) {
@@ -103,6 +115,49 @@ async function deployWorkflow(
         throw error;
       }
     } else {
+      // No ID in local file - check if workflow exists by name
+      const existingWorkflows = await client.listWorkflows();
+      const existingWorkflow = existingWorkflows.find((w) => w.name === workflow.name);
+
+      if (existingWorkflow && existingWorkflow.id) {
+        // Found existing workflow with same name - update it
+        const updated = await client.updateWorkflow(existingWorkflow.id, workflow);
+
+        // Read the original workflow file and add the ID field
+        const fs = await import('fs/promises');
+        const originalContent = await fs.readFile(filePath, 'utf-8');
+        const workflowData = JSON.parse(originalContent);
+        workflowData.id = existingWorkflow.id;
+
+        // Update local file with the ID (cleaned of read-only fields)
+        const cleanedWorkflow = cleanWorkflowForSaving(workflowData);
+        await fs.writeFile(filePath, JSON.stringify(cleanedWorkflow, null, 2) + '\n', 'utf-8');
+
+        // Update workflow tags if they exist
+        if (workflow.tags && workflow.tags.length > 0) {
+          const existingTags = await client.listTags();
+          const tagNameToId = new Map(existingTags.map((tag) => [tag.name, tag.id]));
+
+          const tagIds: string[] = [];
+          for (const tag of workflow.tags) {
+            const tagName = tag.name;
+            if (tagNameToId.has(tagName)) {
+              tagIds.push(tagNameToId.get(tagName)!);
+            } else {
+              const newTag = await client.createTag(tagName);
+              tagIds.push(newTag.id);
+            }
+          }
+
+          await client.updateWorkflowTags(existingWorkflow.id, tagIds);
+        }
+
+        return {
+          success: true,
+          message: `Updated: ${relativePath} (found by name, ID: ${updated.id})`,
+        };
+      }
+
       // Create new workflow
       const wasActive = workflow.active === true;
       const created = await client.createWorkflow(workflow);
@@ -110,7 +165,8 @@ async function deployWorkflow(
       // Update local file with new ID
       workflow.id = created.id;
       const fs = await import('fs/promises');
-      await fs.writeFile(filePath, JSON.stringify(workflow, null, 2) + '\n', 'utf-8');
+      const cleanedWorkflow = cleanWorkflowForSaving(workflow);
+      await fs.writeFile(filePath, JSON.stringify(cleanedWorkflow, null, 2) + '\n', 'utf-8');
 
       // Update workflow tags if they exist
       if (workflow.tags && workflow.tags.length > 0 && created.id) {
