@@ -40,9 +40,9 @@ Create a `n8n.config.json` file in your workflow repository root:
 Then set your environment variables:
 
 ```bash
-export N8N_DEV_URL="https://n8n.dev.company.com"
+export N8N_DEV_URL="https://n8n.dev.company.com/api/v1"
 export N8N_DEV_API_KEY="your-dev-api-key"
-export N8N_PROD_URL="https://n8n.prod.company.com"
+export N8N_PROD_URL="https://n8n.prod.company.com/api/v1"
 export N8N_PROD_API_KEY="your-prod-api-key"
 ```
 

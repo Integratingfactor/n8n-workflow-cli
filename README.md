@@ -51,9 +51,9 @@ npm install --save-dev @integratingfactor/n8n-workflow-cli
 
 2. **Set environment variables** - Configure your n8n credentials:
 ```bash
-export N8N_DEV_URL="https://n8n.dev.company.com"
+export N8N_DEV_URL="https://n8n.dev.company.com/api/v1"
 export N8N_DEV_API_KEY="your-dev-api-key"
-export N8N_PROD_URL="https://n8n.prod.company.com"
+export N8N_PROD_URL="https://n8n.prod.company.com/api/v1"
 export N8N_PROD_API_KEY="your-prod-api-key"
 ```
 
@@ -94,8 +94,6 @@ n8n-workflow-cli deploy prod workflows/business/my-workflow.json
 - [CLI Reference](docs/cli-reference.md) - Complete command documentation
 - [Architecture Decisions](docs/architecture-decisions.md) - Design rationale
 - [Workflow Development Guide](docs/workflow-development.md) - Best practices for workflow development
-- [Deployment Guide](docs/deployment-guide.md) - CI/CD and production deployment
-- [Migration Guide](docs/migration-guide.md) - Migrating workflows between environments
 
 ## Workflow Project Template
 
@@ -111,7 +109,7 @@ Use this template for workflow repositories:
     "list": "n8n-workflow-cli list"
   },
   "devDependencies": {
-    "@integratingfactor/n8n-workflow-cli": "^1.0.0"
+    "@integratingfactor/n8n-workflow-cli": "^1.0.6"
   }
 }
 ```
@@ -150,7 +148,7 @@ node dist/cli.js --help
 ```bash
 # The repo already has n8n.config.json
 # Set your environment variables
-export N8N_DEV_URL="https://your-n8n-dev.com"
+export N8N_DEV_URL="https://your-n8n-dev.com/api/v1"
 export N8N_DEV_API_KEY="your-api-key-here"
 
 # Try pulling workflows

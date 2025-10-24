@@ -44,9 +44,9 @@ cat > n8n.config.json << 'EOF'
 EOF
 
 # Set environment variables
-export N8N_DEV_URL="https://n8n.dev.company.com"
+export N8N_DEV_URL="https://n8n.dev.company.com/api/v1"
 export N8N_DEV_API_KEY="your-dev-api-key"
-export N8N_PROD_URL="https://n8n.prod.company.com"
+export N8N_PROD_URL="https://n8n.prod.company.com/api/v1"
 export N8N_PROD_API_KEY="your-prod-api-key"
 
 # Commit the config (it's safe - uses environment variables for secrets)
@@ -127,7 +127,7 @@ npm run dev -- deploy dev --dry-run
 ```bash
 # The repo already has n8n.config.json
 # Set environment variables for your n8n instance
-export N8N_DEV_URL="https://your-n8n-dev.com"
+export N8N_DEV_URL="https://your-n8n-dev.com/api/v1"
 export N8N_DEV_API_KEY="your-key-here"
 
 # Test pulling workflows (use npm run dev -- for all commands)
@@ -205,7 +205,7 @@ npm run deploy dev                 # ❌ Wrong
 Create `n8n.config.json` in your project directory or current working directory.
 
 ### "Failed to connect to n8n API"
-- Check your `baseUrl` is correct (include https://)
+- Check your `baseUrl` is correct _(include `/api/v1` resource path)_
 - Verify your API key is valid
 - Ensure n8n instance is accessible from your network
 
