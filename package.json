@@ -1,6 +1,6 @@
 {
   "name": "@integratingfactor/n8n-workflow-cli",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "CLI tool for managing n8n workflows across environments with support for tags, validation, and multi-environment deployment",
   "type": "module",
   "main": "./dist/index.js",
