@@ -24,7 +24,7 @@ program
     if (!fs.existsSync(configPath)) {
       console.log('ℹ️  Configuration file .n8n-cli.config.json not found in current directory.');
       console.log('   Create one with your n8n environment settings to get started.');
-      console.log('   See documentation: https://github.com/your-org/n8n-workflow-cli#configuration');
+      console.log('   See documentation: https://github.com/integratingfactor/n8n-workflow-cli#configuration');
       console.log('');
     }
   });
@@ -58,7 +58,7 @@ Configuration:
     "categories": ["business", "management", "shared"]
   }
 
-For more information, visit: https://github.com/your-org/n8n-workflow-cli
+For more information, visit: https://github.com/integratingfactor/n8n-workflow-cli
 `);
 
 program.parse();
