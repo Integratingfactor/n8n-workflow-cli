@@ -7,34 +7,53 @@
 ## For Users (Installing from npm)
 
 ### 1. Install the CLI
-## Installation
+
+Install globally to use across all your workflow projects:
 
 ```bash
 npm install -g @integratingfactor/n8n-workflow-cli
 ```
 
-## Prerequisites
+Verify installation:
+```bash
+n8n-workflow-cli -h
+```
 
 ### 2. Set up your project
+
+Create a workflows directory:
+
 ```bash
-# Create a workflows directory
 mkdir -p my-n8n-workflows/workflows
 cd my-n8n-workflows
+```
 
-# Initialize your repository
+Initialize your repository:
+
+```bash
 git init
 npm init -y
+```
 
-# Create n8n.config.json
+Create `n8n.config.json`:
+
+```bash
 cat > n8n.config.json << 'EOF'
 {
   "workflowsDir": "./workflows",
   "categories": ["business", "management", "shared"]
 }
 EOF
+```
 
-# Set environment variables - choose one method:
+> **Categories:** Categories define which workflows are pulled and how they're organized:
+> - Only workflows with tags matching a category (e.g., `business`, `management`, `shared`) will be pulled
+> - Workflows are saved to `workflows/<category>/` folders based on their tag
+> - Customize categories for your project (e.g., `["api", "automation", "monitoring"]`)
 
+Set environment variables - choose one method:
+
+```bash
 # Method 1: Create .env file (recommended for local development)
 cat > .env << 'EOF'
 N8N_API_URL=https://n8n.dev.company.com/api/v1
@@ -44,18 +63,16 @@ EOF
 # Method 2: Export environment variables (for CI/CD)
 export N8N_API_URL="https://n8n.dev.company.com/api/v1"
 export N8N_API_KEY="your-dev-api-key"
+```
 
-# Commit the config (it's safe - no secrets inside)
+Commit the config (it's safe - no secrets inside):
+
+```bash
 git add n8n.config.json
 git commit -m "Add n8n configuration"
 ```
 
 > **Important:** The `n8n.config.json` file should be **committed to your repository**. It contains only your workflow organization (categories, directory). All secrets (URLs and API keys) are in environment variables. The `.env` file (if used) is gitignored for security.
-
-> **Categories:** Categories define which workflows are pulled and how they're organized:
-> - Only workflows with tags matching a category (e.g., `business`, `management`, `shared`) will be pulled
-> - Workflows are saved to `workflows/<category>/` folders based on their tag
-> - Customize categories for your project (e.g., `["api", "automation", "monitoring"]`)
 
 ### 3. Tag your workflows in n8n
 

@@ -29,6 +29,11 @@ Install globally to use across all your workflow projects:
 npm install -g @integratingfactor/n8n-workflow-cli
 ```
 
+Verify installation:
+```bash
+n8n-workflow-cli -h
+```
+
 ## CLI Commands
 
 ### `pull`
