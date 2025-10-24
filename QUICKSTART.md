@@ -1,5 +1,9 @@
 # Quick Start Guide
 
+> **Important:** There are two ways to use this tool:
+> - **For Users:** Install globally with `npm install -g` and use `n8n-workflow-cli <command>`
+> - **For Contributors:** Clone the repo and use `npm run dev -- <command>` (note the `--`)
+
 ## For Users (Installing from npm)
 
 ### 1. Install the CLI
@@ -80,6 +84,9 @@ npm run build
 ```
 
 ### 3. Run in development mode
+
+**Important:** When developing, use `npm run dev -- <command>` (note the `--` before the command).
+
 ```bash
 # See all commands
 npm run dev -- --help
@@ -87,6 +94,7 @@ npm run dev -- --help
 # Test commands without building
 npm run dev -- list
 npm run dev -- validate
+npm run dev -- deploy dev --dry-run
 ```
 
 ### 4. Test with your n8n instance
@@ -98,8 +106,14 @@ cp .n8n-cli.config.example.json .n8n-cli.config.json
 # Set environment variables for API keys
 export N8N_DEV_API_KEY="your-key-here"
 
-# Test pulling workflows
+# Test pulling workflows (use npm run dev -- for all commands)
 npm run dev -- pull dev
+
+# Test deploying
+npm run dev -- deploy dev --dry-run
+
+# Test listing with remote
+npm run dev -- list --remote dev
 ```
 
 ### 5. Link globally for testing
@@ -146,6 +160,21 @@ your-workflow-project/
 - **Validation**: Run `validate` before deploying to catch errors early
 
 ## Troubleshooting
+
+### "npm ERR! Missing script: deploy" (or other commands)
+You're trying to run `npm run deploy` which doesn't exist. Use one of these instead:
+
+**If you're developing (cloned the repo):**
+```bash
+npm run dev -- deploy dev          # Correct
+npm run deploy -- dev              # ❌ Wrong
+```
+
+**If you installed globally:**
+```bash
+n8n-workflow-cli deploy dev        # Correct
+npm run deploy dev                 # ❌ Wrong
+```
 
 ### "Configuration file not found"
 Create `.n8n-cli.config.json` in your project directory or current working directory.
