@@ -217,6 +217,6 @@ Run `npm install` to install all dependencies.
 
 ## Next Steps
 
-- Read the [CLI Reference](docs/cli-reference.md) for all commands
-- See [Architecture Decisions](docs/architecture-decisions.md) for design details
-- Check out [Workflow Development](docs/workflow-development.md) best practices
+- Read the [CLI Reference](cli-reference.md) for all commands
+- See [Architecture Decisions](architecture-decisions.md) for design details
+- Check out [Workflow Development](workflow-development.md) best practices
