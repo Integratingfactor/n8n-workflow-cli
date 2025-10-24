@@ -68,25 +68,6 @@ n8n-workflow-cli validate
 n8n-workflow-cli deploy workflows/business/my-workflow.json
 ```
 
-## Workflow Project Template
-
-Use this template for workflow repositories:
-
-```json
-{
-  "name": "my-workflows",
-  "scripts": {
-    "validate": "n8n-workflow-cli validate",
-    "pull": "n8n-workflow-cli pull",
-    "deploy": "n8n-workflow-cli deploy",
-    "list": "n8n-workflow-cli list"
-  },
-  "devDependencies": {
-    "@integratingfactor/n8n-workflow-cli": "^1.1.2"
-  }
-}
-```
-
 ## Workflow Structure Best Practices
 
 ### Naming Conventions
