@@ -72,8 +72,10 @@ n8n-workflow-cli deploy prod workflows/business/my-workflow.json
 ## Documentation
 
 - [CLI Reference](docs/cli-reference.md) - Complete command documentation
-- [Configuration Guide](docs/configuration.md) - Environment setup and options
 - [Architecture Decisions](docs/architecture-decisions.md) - Design rationale
+- [Workflow Development Guide](docs/workflow-development.md) - Best practices for workflow development
+- [Deployment Guide](docs/deployment-guide.md) - CI/CD and production deployment
+- [Migration Guide](docs/migration-guide.md) - Migrating workflows between environments
 
 ## Workflow Project Template
 
@@ -111,10 +113,14 @@ npm run build
 ```
 
 3. **Run in development mode:**
+
+> **Note:** Use `npm run dev -- <command>` (with `--`) for all CLI commands during development.
+
 ```bash
 # Run commands directly without building
 npm run dev -- list
 npm run dev -- --help
+npm run dev -- deploy dev --dry-run
 
 # Or use the built version
 node dist/cli.js --help
