@@ -2,7 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.1] - Safety during workflow creation
+## [1.1.2] - 2025-10-24 - Documentation and validation improvements
+
+### Changed
+- **Documentation**: Split README into user-focused (README.md) and developer-focused (DEVELOPMENT.md) documentation
+  - README.md now provides clear usage documentation for npm package users
+  - Includes step-by-step quick start guide for setting up workflow projects
+  - Added best practices, troubleshooting, and common workflows sections
+  - DEVELOPMENT.md contains technical details for contributors
+
+### Fixed
+- Added validation for `--category` option in pull command
+  - Now exits with error if provided category is not in configured categories list
+  - Shows helpful error message with list of valid categories from n8n.config.json
+
+## [1.1.1] - 2025-10-24 - Safety during workflow creation
 
 ### Changed
 - **BREAKING (Safety Feature)**: New workflows are now created as inactive by default

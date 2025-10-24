@@ -12,6 +12,16 @@ export async function pullCommandHandler(options: PullOptions): Promise<void> {
   try {
     const config = await configManager.loadConfig(options.environment);
     const categories = configManager.getCategories();
+    
+    // Validate category option if provided
+    if (options.category && !categories.includes(options.category)) {
+      spinner.fail(`Invalid category: ${chalk.red(options.category)}`);
+      console.error(chalk.red(`\nCategory must be one of: ${categories.join(', ')}`));
+      console.error(chalk.yellow(`\nConfigured categories in n8n.config.json:`));
+      categories.forEach((cat) => console.error(chalk.yellow(`  - ${cat}`)));
+      process.exit(1);
+    }
+    
     spinner.succeed(`Loaded configuration for ${chalk.cyan(options.environment)} environment`);
 
     spinner.start('Connecting to n8n API...');
