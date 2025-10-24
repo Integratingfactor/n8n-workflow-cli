@@ -28,16 +28,6 @@ npm init -y
 # Create n8n.config.json
 cat > n8n.config.json << 'EOF'
 {
-  "environments": {
-    "dev": {
-      "baseUrl": "${N8N_DEV_URL}",
-      "apiKey": "${N8N_DEV_API_KEY}"
-    },
-    "prod": {
-      "baseUrl": "${N8N_PROD_URL}",
-      "apiKey": "${N8N_PROD_API_KEY}"
-    }
-  },
   "workflowsDir": "./workflows",
   "categories": ["business", "management", "shared"]
 }
@@ -47,24 +37,20 @@ EOF
 
 # Method 1: Create .env file (recommended for local development)
 cat > .env << 'EOF'
-N8N_DEV_URL=https://n8n.dev.company.com/api/v1
-N8N_DEV_API_KEY=your-dev-api-key
-N8N_PROD_URL=https://n8n.prod.company.com/api/v1
-N8N_PROD_API_KEY=your-prod-api-key
+N8N_API_URL=https://n8n.dev.company.com/api/v1
+N8N_API_KEY=your-dev-api-key
 EOF
 
 # Method 2: Export environment variables (for CI/CD)
-export N8N_DEV_URL="https://n8n.dev.company.com/api/v1"
-export N8N_DEV_API_KEY="your-dev-api-key"
-export N8N_PROD_URL="https://n8n.prod.company.com/api/v1"
-export N8N_PROD_API_KEY="your-prod-api-key"
+export N8N_API_URL="https://n8n.dev.company.com/api/v1"
+export N8N_API_KEY="your-dev-api-key"
 
-# Commit the config (it's safe - uses environment variables for secrets)
+# Commit the config (it's safe - no secrets inside)
 git add n8n.config.json
 git commit -m "Add n8n configuration"
 ```
 
-> **Important:** The `n8n.config.json` file should be **committed to your repository**. It contains your categories and environment structure, but uses environment variables for secrets. The `.env` file (if used) is gitignored for security.
+> **Important:** The `n8n.config.json` file should be **committed to your repository**. It contains only your workflow organization (categories, directory). All secrets (URLs and API keys) are in environment variables. The `.env` file (if used) is gitignored for security.
 
 > **Categories:** Categories define which workflows are pulled and how they're organized:
 > - Only workflows with tags matching a category (e.g., `business`, `management`, `shared`) will be pulled
@@ -137,8 +123,8 @@ npm run dev -- deploy dev --dry-run
 ```bash
 # The repo already has n8n.config.json
 # Set environment variables for your n8n instance
-export N8N_DEV_URL="https://your-n8n-dev.com/api/v1"
-export N8N_DEV_API_KEY="your-key-here"
+export N8N_API_URL="https://your-n8n.com/api/v1"
+export N8N_API_KEY="your-key-here"
 
 # Test pulling workflows (use npm run dev -- for all commands)
 npm run dev -- pull dev

@@ -6,25 +6,12 @@ import { config as loadDotenv } from 'dotenv';
 // Load .env file if it exists
 loadDotenv();
 
-const EnvironmentConfigSchema = z.object({
-  baseUrl: z
-    .string()
-    .url()
-    .refine(
-      (url) => url.endsWith('/api/v1'),
-      'baseUrl must end with /api/v1 (e.g., https://n8n.example.com/api/v1)'
-    ),
-  apiKey: z.string(),
-});
-
 const ConfigSchema = z.object({
-  environments: z.record(EnvironmentConfigSchema),
   workflowsDir: z.string().optional().default('./workflows'),
   categories: z.array(z.string()).optional().default(['business', 'management', 'shared']),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
-export type EnvironmentConfig = z.infer<typeof EnvironmentConfigSchema>;
 
 export function loadConfig(): Config {
   // Look for config in current working directory first, then parent directories
@@ -85,31 +72,31 @@ function resolveEnvironmentVariables(obj: any): any {
   return obj;
 }
 
-export function getEnvironmentConfig(environment: string): EnvironmentConfig {
-  const config = loadConfig();
-  const envConfig = config.environments[environment];
+export function getEnvironmentConfig(_environmentName: string) {
+  // Get URL and API key from simple environment variables
+  const baseUrl = process.env.N8N_API_URL;
+  const apiKey = process.env.N8N_API_KEY;
 
-  if (!envConfig) {
-    const availableEnvs = Object.keys(config.environments).join(', ');
+  if (!baseUrl) {
     throw new Error(
-      `Environment '${environment}' not found. Available environments: ${availableEnvs}`
+      `Environment variable N8N_API_URL is not set. Please set it before running the CLI:\n  export N8N_API_URL="https://n8n.example.com/api/v1"`
     );
   }
 
-  // Validate that required values are set
-  if (!envConfig.baseUrl || envConfig.baseUrl.includes('${')) {
+  if (!apiKey) {
     throw new Error(
-      `Invalid baseUrl for environment '${environment}'. Make sure environment variables are set correctly.`
+      `Environment variable N8N_API_KEY is not set. Please set it before running the CLI:\n  export N8N_API_KEY="your-api-key"`
     );
   }
 
-  if (!envConfig.apiKey || envConfig.apiKey.includes('${')) {
+  // Validate URL ends with /api/v1
+  if (!baseUrl.endsWith('/api/v1')) {
     throw new Error(
-      `Invalid apiKey for environment '${environment}'. Make sure environment variables are set correctly.`
+      `Invalid N8N_API_URL: must end with /api/v1 (e.g., https://n8n.example.com/api/v1). Current value: ${baseUrl}`
     );
   }
 
-  return envConfig;
+  return { baseUrl, apiKey };
 }
 
 // Configuration manager for CLI commands

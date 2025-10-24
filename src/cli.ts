@@ -57,19 +57,17 @@ Examples:
 Configuration:
   Create n8n.config.json in your project root:
   {
-    "environments": {
-      "dev": {
-        "baseUrl": "\${N8N_DEV_URL}",
-        "apiKey": "\${N8N_DEV_API_KEY}"
-      }
-    },
     "workflowsDir": "./workflows",
     "categories": ["business", "management", "shared"]
   }
   
   Set environment variables (use .env file or export):
-  N8N_DEV_URL=https://n8n.dev.company.com/api/v1
-  N8N_DEV_API_KEY=your-api-key
+  N8N_API_URL=https://n8n.example.com/api/v1
+  N8N_API_KEY=your-api-key
+  
+  For multiple environments, switch variables as needed:
+  export N8N_API_URL="https://n8n.dev.example.com/api/v1"   # dev
+  export N8N_API_URL="https://n8n.prod.example.com/api/v1"  # prod
 
 For more information, visit: https://github.com/integratingfactor/n8n-workflow-cli
 `

@@ -1,18 +1,4 @@
 {
-  "environments": {
-    "dev": {
-      "baseUrl": "${N8N_DEV_URL}",
-      "apiKey": "${N8N_DEV_API_KEY}"
-    },
-    "staging": {
-      "baseUrl": "${N8N_STAGING_URL}",
-      "apiKey": "${N8N_STAGING_API_KEY}"
-    },
-    "prod": {
-      "baseUrl": "${N8N_PROD_URL}",
-      "apiKey": "${N8N_PROD_API_KEY}"
-    }
-  },
   "workflowsDir": "./workflows",
   "categories": ["business", "management", "shared"]
 }

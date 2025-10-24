@@ -34,24 +34,18 @@ npm install --save-dev @integratingfactor/n8n-workflow-cli
 1. **Create configuration** - Create `n8n.config.json` in your workflow repository:
 ```json
 {
-  "environments": {
-    "dev": {
-      "baseUrl": "${N8N_DEV_URL}",
-      "apiKey": "${N8N_DEV_API_KEY}"
-    },
-    "prod": {
-      "baseUrl": "${N8N_PROD_URL}",
-      "apiKey": "${N8N_PROD_API_KEY}"
-    }
-  },
   "workflowsDir": "./workflows",
   "categories": ["business", "management", "shared"]
 }
 ```
 
-> **Note:** The `baseUrl` must include the `/api/v1` path (e.g., `https://n8n.example.com/api/v1`). This is validated automatically.
-
 2. **Set environment variables** - Configure your n8n credentials:
+
+The CLI uses two simple environment variables:
+- `N8N_API_URL` - Your n8n instance URL (must end with `/api/v1`)
+- `N8N_API_KEY` - Your n8n API key
+
+Switch environments by changing these variables as needed.
 
 **Option 1: Using .env file (recommended for local development)**
 ```bash
@@ -59,21 +53,22 @@ npm install --save-dev @integratingfactor/n8n-workflow-cli
 cp .env.example .env
 
 # Edit .env with your values
-N8N_DEV_URL=https://n8n.dev.company.com/api/v1
-N8N_DEV_API_KEY=your-dev-api-key
-N8N_PROD_URL=https://n8n.prod.company.com/api/v1
-N8N_PROD_API_KEY=your-prod-api-key
+N8N_API_URL=https://n8n.dev.company.com/api/v1
+N8N_API_KEY=your-dev-api-key
 ```
 
-**Option 2: Using shell exports (for CI/CD)**
+**Option 2: Using shell exports**
 ```bash
-export N8N_DEV_URL="https://n8n.dev.company.com/api/v1"
-export N8N_DEV_API_KEY="your-dev-api-key"
-export N8N_PROD_URL="https://n8n.prod.company.com/api/v1"
-export N8N_PROD_API_KEY="your-prod-api-key"
+# For dev environment
+export N8N_API_URL="https://n8n.dev.company.com/api/v1"
+export N8N_API_KEY="your-dev-api-key"
+
+# For prod environment
+export N8N_API_URL="https://n8n.prod.company.com/api/v1"
+export N8N_API_KEY="your-prod-api-key"
 ```
 
-> **💡 Important:** The `n8n.config.json` file should be **committed to your repository**. It contains your project's categories and environment structure, but uses environment variables for secrets. The `.env` file is gitignored for security.
+> **💡 Important:** The `n8n.config.json` file should be **committed to your repository**. It contains only workflow organization settings (categories, directory). All credentials are in environment variables. The `.env` file is gitignored for security.
 
 ### Categories Configuration
 
