@@ -26,17 +26,29 @@ export class WorkflowManager {
     const categoryDir = this.getCategoryDirectory(category);
     this.ensureDirectoryExists(categoryDir);
 
+    // Remove read-only fields that shouldn't be saved to source control
+    // These fields are managed by n8n and cause unnecessary diffs
+    const fieldsToRemove = [
+      'createdAt',
+      'updatedAt',
+      'versionId',
+      'isArchived', // Usually false, managed by n8n
+    ];
+
+    const cleanedWorkflow = { ...workflow };
+    fieldsToRemove.forEach((field) => delete cleanedWorkflow[field]);
+
     // Normalize null values to empty objects for validation
     const normalizedWorkflow = {
-      ...workflow,
-      staticData: workflow.staticData === null ? {} : workflow.staticData,
-      meta: workflow.meta === null ? {} : workflow.meta,
+      ...cleanedWorkflow,
+      staticData: cleanedWorkflow.staticData === null ? {} : cleanedWorkflow.staticData,
+      meta: cleanedWorkflow.meta === null ? {} : cleanedWorkflow.meta,
     };
 
     const filename = `${workflow.name.replace(/[^a-zA-Z0-9_-]/g, '_')}.json`;
     const filePath = path.join(categoryDir, filename);
 
-    fs.writeFileSync(filePath, JSON.stringify(normalizedWorkflow, null, 2));
+    fs.writeFileSync(filePath, JSON.stringify(normalizedWorkflow, null, 2) + '\n');
     console.log(`✓ Saved workflow: ${workflow.name} -> ${path.relative(process.cwd(), filePath)}`);
   }
 
