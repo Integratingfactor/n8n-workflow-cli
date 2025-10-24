@@ -13,103 +13,11 @@ A powerful CLI tool for managing n8n workflows across multiple environments with
 - ⚡ **Parallel deployment** - Deploy multiple workflows simultaneously
 - 🔍 **Dry-run mode** - Test deployments without making changes
 
-## Quick Start
-
-> 📖 **New to this tool?** See the detailed [Quick Start Guide](QUICKSTART.md) for step-by-step instructions.
-
-1. **Create configuration** - Create `n8n.config.json` in your workflow repository:
-```json
-{
-  "workflowsDir": "./workflows",
-  "categories": ["business", "management", "shared"]
-}
-```
-
-2. **Set environment variables** - Configure your n8n credentials:
-
-The CLI uses two simple environment variables:
-- `N8N_API_URL` - Your n8n instance URL (must end with `/api/v1`)
-- `N8N_API_KEY` - Your n8n API key
-
-Switch environments by changing these variables as needed.
-
-**Option 1: Using .env file (recommended for local development)**
-```bash
-# Copy the example file
-cp .env.example .env
-
-# Edit .env with your values
-N8N_API_URL=https://n8n.dev.company.com/api/v1
-N8N_API_KEY=your-dev-api-key
-```
-
-**Option 2: Using shell exports**
-```bash
-# For dev environment
-export N8N_API_URL="https://n8n.dev.company.com/api/v1"
-export N8N_API_KEY="your-dev-api-key"
-
-# For prod environment
-export N8N_API_URL="https://n8n.prod.company.com/api/v1"
-export N8N_API_KEY="your-prod-api-key"
-```
-
-> **💡 Important:** The `n8n.config.json` file should be **committed to your repository**. It contains only workflow organization settings (categories, directory). All credentials are in environment variables. The `.env` file is gitignored for security.
-
-### Categories Configuration
-
-Categories help organize workflows into folders in your repository:
-
-- **Define categories** in the `categories` array - customize for your project needs (e.g., `["api", "automation", "monitoring"]`)
-- **Commit the config** - The `n8n.config.json` file with your categories should be committed so the team shares the same organization
-- **Tag workflows in n8n** - Only workflows with tags matching a category name will be pulled
-- **Filter by category** - Use `--category` option to pull only specific category workflows
-
-Example: A workflow tagged with `business` in n8n will be saved to `workflows/business/` when pulled.
-
-3. **Pull workflows**:
-```bash
-# Pull all workflows with matching category tags
-n8n-workflow-cli pull
-
-# Pull only workflows tagged with "business"
-n8n-workflow-cli pull --category business
-```
-
-4. **Validate workflows**:
-```bash
-n8n-workflow-cli validate
-```
-
-5. **Deploy workflows**:
-```bash
-n8n-workflow-cli deploy workflows/business/my-workflow.json
-```
-
 ## Documentation
 
 - [CLI Reference](docs/cli-reference.md) - Complete command documentation
 - [Architecture Decisions](docs/architecture-decisions.md) - Design rationale
 - [Workflow Development Guide](docs/workflow-development.md) - Best practices for workflow development
-
-## Workflow Project Template
-
-Use this template for workflow repositories:
-
-```json
-{
-  "name": "my-workflows",
-  "scripts": {
-    "validate": "n8n-workflow-cli validate",
-    "pull": "n8n-workflow-cli pull",
-    "deploy": "n8n-workflow-cli deploy",
-    "list": "n8n-workflow-cli list"
-  },
-  "devDependencies": {
-    "@integratingfactor/n8n-workflow-cli": "^1.0.6"
-  }
-}
-```
 
 ## Development
 
@@ -117,17 +25,35 @@ Use this template for workflow repositories:
 
 If you've cloned this repository to contribute or modify the tool:
 
-1. **Install dependencies:**
+1. **Create a local n8n.config.json file for testing:**
+```bash
+cat > n8n.config.json << 'EOF'
+{
+  "workflowsDir": "./workflows",
+  "categories": ["business", "management", "shared"]
+}
+EOF
+```
+
+2. **Setup n8n environment variables for testing:**
+```bash
+cat > .env << 'EOF'
+N8N_API_URL=https://n8n.dev.company.com/api/v1
+N8N_API_KEY=your-dev-api-key
+EOF
+```
+
+3. **Install dependencies:**
 ```bash
 npm install
 ```
 
-2. **Build the project:**
+4. **Build the project:**
 ```bash
 npm run build
 ```
 
-3. **Run in development mode:**
+5. **Run in development mode:**
 
 > **Note:** Use `npm run dev -- <command>` (with `--`) for all CLI commands during development.
 
@@ -141,7 +67,7 @@ npm run dev -- deploy --dry-run
 node dist/cli.js --help
 ```
 
-4. **Test with a real n8n instance:**
+6. **Test with a real n8n instance:**
 ```bash
 # The repo already has n8n.config.json
 # Set your environment variables
@@ -152,7 +78,7 @@ export N8N_DEV_API_KEY="your-api-key-here"
 npm run dev -- pull
 ```
 
-5. **Link globally for testing:**
+7. **Link globally for testing:**
 ```bash
 npm link
 n8n-workflow-cli --help
@@ -175,7 +101,9 @@ n8n-workflow-cli/
 │       └── validate.ts
 ├── dist/                   # Compiled JavaScript (gitignored)
 ├── docs/                   # Documentation
-└── workflows/              # Example workflows (gitignored locally)
+├── workflows/              # Test workflows (gitignored locally)
+├── .env                    # Test environment variables (gitignored locally)
+└── n8n.config.json         # Test config file (gitignored locally)
 ```
 
 ### Available Scripts
