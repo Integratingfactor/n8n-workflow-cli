@@ -283,16 +283,16 @@ export async function deployCommandHandler(options: DeployOptions): Promise<void
     const projectRoot = configManager.getProjectRoot();
     let filesToDeploy: string[] = [];
 
-    if (options.target) {
-      // Check if target is a specific file
-      if (options.target.endsWith('.json')) {
-        const targetPath = path.isAbsolute(options.target)
-          ? options.target
-          : path.join(projectRoot, options.target);
+    if (options.workflow) {
+      // Check if workflow is a specific file
+      if (options.workflow.endsWith('.json')) {
+        const targetPath = path.isAbsolute(options.workflow)
+          ? options.workflow
+          : path.join(projectRoot, options.workflow);
         filesToDeploy = [targetPath];
       } else {
-        // Target is a category
-        filesToDeploy = await findWorkflowFiles(projectRoot, options.target);
+        // Workflow is a category
+        filesToDeploy = await findWorkflowFiles(projectRoot, options.workflow);
       }
     } else {
       // Deploy all workflows
