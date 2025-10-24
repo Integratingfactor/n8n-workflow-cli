@@ -38,31 +38,31 @@ export N8N_PROD_API_KEY="your-prod-api-key"
 
 ### 3. Pull workflows from n8n
 ```bash
-n8n-workflows pull dev
+n8n-workflow-cli pull dev
 ```
 
 ### 4. Common commands
 ```bash
 # List all workflows
-n8n-workflows list
+n8n-workflow-cli list
 
 # List workflows in remote environment
-n8n-workflows list --remote prod
+n8n-workflow-cli list --remote prod
 
 # Validate all workflows
-n8n-workflows validate
+n8n-workflow-cli validate
 
 # Deploy to production
-n8n-workflows deploy prod
+n8n-workflow-cli deploy prod
 
 # Deploy specific workflow
-n8n-workflows deploy prod workflows/business/my-workflow.json
+n8n-workflow-cli deploy prod workflows/business/my-workflow.json
 
 # Dry run (test without changes)
-n8n-workflows deploy prod --dry-run
+n8n-workflow-cli deploy prod --dry-run
 
 # Execute a workflow
-n8n-workflows execute prod "My Workflow Name"
+n8n-workflow-cli execute prod "My Workflow Name"
 ```
 
 ## For Contributors (Cloning the repo)
@@ -105,7 +105,7 @@ npm run dev -- pull dev
 ### 5. Link globally for testing
 ```bash
 npm link
-n8n-workflows --help
+n8n-workflow-cli --help
 ```
 
 ### 6. Make changes and rebuild

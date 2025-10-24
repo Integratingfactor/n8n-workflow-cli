@@ -56,17 +56,17 @@ Example `.n8n-cli.config.json`:
 
 2. **Pull workflows** from an environment:
 ```bash
-n8n-workflows pull dev
+n8n-workflow-cli pull dev
 ```
 
 3. **Validate workflows**:
 ```bash
-n8n-workflows validate
+n8n-workflow-cli validate
 ```
 
 4. **Deploy workflows**:
 ```bash
-n8n-workflows deploy prod workflows/business/my-workflow.json
+n8n-workflow-cli deploy prod workflows/business/my-workflow.json
 ```
 
 ## Documentation
@@ -83,10 +83,10 @@ Use this template for workflow repositories:
 {
   "name": "my-workflows",
   "scripts": {
-    "validate": "n8n-workflows validate",
-    "pull": "n8n-workflows pull",
-    "deploy": "n8n-workflows deploy",
-    "list": "n8n-workflows list"
+    "validate": "n8n-workflow-cli validate",
+    "pull": "n8n-workflow-cli pull",
+    "deploy": "n8n-workflow-cli deploy",
+    "list": "n8n-workflow-cli list"
   },
   "devDependencies": {
     "@company/n8n-workflow-cli": "^1.0.0"
@@ -135,7 +135,7 @@ npm run dev -- pull dev
 5. **Link globally for testing:**
 ```bash
 npm link
-n8n-workflows --help
+n8n-workflow-cli --help
 ```
 
 ### Project Structure

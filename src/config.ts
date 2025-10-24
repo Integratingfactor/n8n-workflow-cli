@@ -29,18 +29,22 @@ export function loadConfig(): Config {
       try {
         const configFile = fs.readFileSync(configPath, 'utf-8');
         const configData = JSON.parse(configFile);
-        
+
         // Resolve environment variables
         const resolvedConfig = resolveEnvironmentVariables(configData);
-        
+
         return ConfigSchema.parse(resolvedConfig);
       } catch (error) {
-        throw new Error(`Invalid configuration in ${configPath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        throw new Error(
+          `Invalid configuration in ${configPath}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
       }
     }
   }
 
-  throw new Error('Configuration file .n8n-cli.config.json not found. Please create one in your project directory.');
+  throw new Error(
+    'Configuration file .n8n-cli.config.json not found. Please create one in your project directory.'
+  );
 }
 
 function resolveEnvironmentVariables(obj: any): any {
@@ -53,11 +57,11 @@ function resolveEnvironmentVariables(obj: any): any {
       return value;
     });
   }
-  
+
   if (Array.isArray(obj)) {
     return obj.map(resolveEnvironmentVariables);
   }
-  
+
   if (obj && typeof obj === 'object') {
     const resolved: any = {};
     for (const [key, value] of Object.entries(obj)) {
@@ -65,19 +69,21 @@ function resolveEnvironmentVariables(obj: any): any {
     }
     return resolved;
   }
-  
+
   return obj;
 }
 
 export function getEnvironmentConfig(environment: string): EnvironmentConfig {
   const config = loadConfig();
   const envConfig = config.environments[environment];
-  
+
   if (!envConfig) {
     const availableEnvs = Object.keys(config.environments).join(', ');
-    throw new Error(`Environment '${environment}' not found. Available environments: ${availableEnvs}`);
+    throw new Error(
+      `Environment '${environment}' not found. Available environments: ${availableEnvs}`
+    );
   }
-  
+
   return envConfig;
 }
 
@@ -90,8 +96,8 @@ export const configManager = {
       N8N_API_KEY: envConfig.apiKey,
     };
   },
-  
+
   getProjectRoot: () => {
     return process.cwd();
-  }
+  },
 };
