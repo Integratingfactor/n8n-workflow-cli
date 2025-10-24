@@ -1,228 +1,33 @@
 # n8n Workflow CLI
 
-A command-line tool for managing n8n workflows as code. Keep your workflows in version control, collaborate with your team, and deploy across environments with confidence.A powerful CLI tool for managing n8n workflows across multiple environments with support for tags, validation, and automated deployment.
+A powerful CLI tool for managing n8n workflows across multiple environments with support for tags, validation, and automated deployment.
 
 ## Why Use This Tool?
 
-- 📁 **Workflows as Code** - Store workflows in Git alongside your project code- 🚀 **Multi-environment support** - Deploy to dev, test, prod environments
+- 📁 **Workflows as Code** - Store workflows in Git alongside your project code
 
-- 🏷️ **Organized by Categories** - Tag and filter workflows by project/team using n8n tags- 🏷️ **Advanced tags management** - Automatic tag creation and assignment
+- 🏷️ **Organized by Categories** - Tag and filter workflows by project/team using n8n tags
 
-- 🔄 **Bi-directional Sync** - Pull workflows from n8n, edit locally, and deploy back- ✅ **Workflow validation** - Comprehensive JSON schema validation
+- 🔄 **Bi-directional Sync** - Pull workflows from n8n, edit locally, and deploy back
 
-- ✅ **Validation** - Catch errors before deployment with built-in validation- 🔄 **Pull/Push workflows** - Sync workflows between environments
+- ✅ **Workflow validation** - Comprehensive JSON schema validation
 
-- 🛡️ **Safe Deployments** - New workflows are created inactive; no duplicate workflows- ⚡ **Parallel deployment** - Deploy multiple workflows simultaneously
+- 🔄 **Pull/Push workflows** - Sync workflows between environments
 
-- 🚀 **Multi-Environment** - Switch between dev/staging/prod by changing environment variables- 🔍 **Dry-run mode** - Test deployments without making changes
+- 🛡️ **Safe Deployments** - New workflows are created inactive; no duplicate workflows
+
+- ⚡ **Parallel deployment** - Deploy multiple workflows simultaneously
+
+- 🔍 **Dry-run mode** - Test deployments without making changes
 
 
 ## Installation
 
-Install globally to use across all your projects:
+Install globally to use across all your workflow projects:
 
 ```bash
 npm install -g @integratingfactor/n8n-workflow-cli
 ```
-
-Or install as a dev dependency in your project:
-
-```bash
-npm install --save-dev @integratingfactor/n8n-workflow-cli
-```
-
-## Quick Start
-
-### Workflow repo setup
-
-Create a new directory for your n8n workflows:
-
-```bash
-mkdir my-n8n-workflows
-cd my-n8n-workflows
-git init
-```
-
-Create `n8n.config.json` in your project root:
-
-```json
-{
-  "workflowsDir": "./workflows",
-  "categories": ["business", "management", "shared"]
-}
-```
-Configuration Options:
-
-- `workflowsDir`: Directory where workflow JSON files are stored (relative to config file)
-- `categories`: List of workflow categories (used as n8n tags for organization)
-
-### Configure n8n Connection
-
-The CLI uses two simple environment variables:
-
-- `N8N_API_URL` - Your n8n instance API URL (must end with `/api/v1`)
-- `N8N_API_KEY` - Your n8n API key (from Settings → API in n8n)
-
-**Option 1: Using .env file (recommended for local development)**
-
-```bash
-# Edit .env with your values
-N8N_API_URL=https://n8n.dev.company.com/api/v1
-N8N_API_KEY=your-dev-api-key
-
-# Add `.env` to your `.gitignore`:
-echo ".env" >> .gitignore
-```
-
-**Option 2: Using shell exports**
-
-```bash
-export N8N_API_URL="https://n8n.dev.company.com/api/v1"
-export N8N_API_KEY="your-dev-api-key"
-```
-
-> **💡 Important:** The `n8n.config.json` file should be **committed to your repository**. It contains only workflow organization settings (categories, directory). All credentials are in environment variables. The `.env` file is gitignored for security.
-
-
-### Categories Configuration
-
-Categories help organize workflows into folders in your repository:
-
-- **Define categories** in the `categories` array - customize for your project needs (e.g., `["api", "automation", "monitoring"]`)
-
-- **Commit the config** - The `n8n.config.json` file with your categories should be committed so the team shares the same organization
-
-- **Tag workflows in n8n** - Only workflows with tags matching a category name will be pulled
-
-### Pull workflows from your n8n instance
-
-This creates workflow JSON files in your `workflowsDir`, organized by category.
-
-```bash
-# Pull all workflows with matching category tags
-n8n-workflow-cli pull
-
-# Pull only workflows tagged with "business"
-n8n-workflow-cli pull --category business
-```
-
-### Validate workflows
-
-```bash
-n8n-workflow-cli validate
-```
-
-### Make Changes and Deploy
-
-Edit workflow files locally, then deploy:
-
-```bash
-# deploy a specific workflow
-n8n-workflow-cli deploy workflows/business/my-workflow.json
-
-# deploy all workflows
-n8n-workflow-cli deploy
-```
-**Important:** New workflows are created as **inactive** for safety. You must:
-1. Verify the workflow in n8n UI
-
-2. Configure credentials and connections
-
-3. Test the workflow
-
-4. Manually activate it when ready
-
-## Documentation
-
-- [Workflow Development Guide](docs/workflow-development.md) - Best practices for workflow development
-- [CLI Reference](docs/cli-reference.md) - Complete command documentation
-- [Architecture Decisions](docs/architecture-decisions.md) - Design rationale
-
-## Workflow Project Template
-
-Use this template for workflow repositories:
-
-```json
- {
- "name": "my-workflows",
-  "scripts": {
-    "validate": "n8n-workflow-cli validate",
-    "pull": "n8n-workflow-cli pull",
-    "deploy": "n8n-workflow-cli deploy",
-    "list": "n8n-workflow-cli list"
-  },
-  "devDependencies": {
-    "@integratingfactor/n8n-workflow-cli": "^1.1.1"
-  }
-}
-```
-
-## Common Usage
-
-### Validating Workflows
-
-Check for errors before deploying:
-
-```bash
-n8n-workflow-cli validate
-```
-
-### Viewing Remote Workflows
-
-See what's in your n8n instance:
-
-```bash
-n8n-workflow-cli list --remote
-```
-
-### Setting Up After Cloning
-If you've cloned this repository to contribute or modify the tool:
-
-1. **Install dependencies:**
-
-```bash
-npm install
-```
-
-2. **Build the project:**
-
-```bash
-npm run build
-```
-
-3. **Run in development mode:**
-
-> **Note:** Use `npm run dev -- <command>` (with `--`) for all CLI commands during development.
-
-```bash
-export N8N_API_URL=https://dev.n8n.example.com/api/v1
-export N8N_API_KEY=dev-api-key
-
-# Run commands directly without building
-npm run dev -- --help
-npm run dev -- deploy --dry-run
-
-# Or use the built version
-node dist/cli.js --help
-node dist/cli.js deploy --dry-run
-```
-
-4. **Test with a real n8n instance:**
-
-```bash
-# Set your environment variables
-export N8N_DEV_URL="https://your-n8n-dev.com/api/v1"
-export N8N_DEV_API_KEY="your-api-key-here"
-n8n-workflow-cli list --remote
-```
-
-5. **Link globally for testing:**
-
-```bash
-npm link
-n8n-workflow-cli --help
-```
-
 
 ## CLI Commands
 
@@ -290,7 +95,7 @@ n8n-workflow-cli list [options]
 ```
 
 **Options:**
-- `--remote` - List workflows from n8n instead of local files
+- `--remote` - List workflows from n8n instance (also) along with local files
 
 **Examples:**
 ```bash
@@ -321,7 +126,7 @@ A typical workflow project looks like this:
 
 ```
 my-n8n-workflows/
-├── .env                    # Environment variables (gitignored)
+├── .env                   # Environment variables (gitignored)
 ├── .gitignore             # Ignore .env and other files
 ├── n8n.config.json        # Tool configuration
 ├── README.md              # Project documentation
@@ -334,6 +139,108 @@ my-n8n-workflows/
     └── shared/
         └── send-notification.json
 ```
+
+## Quick Start
+
+### Workflow repo setup
+
+Create a new directory for your n8n workflows:
+
+```bash
+mkdir my-n8n-workflows
+cd my-n8n-workflows
+git init
+```
+
+Create `n8n.config.json` in your project root:
+
+```json
+{
+  "workflowsDir": "./workflows",
+  "categories": ["business", "management", "shared"]
+}
+```
+Configuration Options:
+
+- `workflowsDir`: Directory where workflow JSON files are stored (relative to config file)
+- `categories`: List of workflow categories (used as n8n tags for organization)
+
+
+> **💡 Important:** The `n8n.config.json` file should be **committed to your repository**.
+
+
+### Configure n8n Connection
+
+The CLI uses two simple environment variables:
+
+- `N8N_API_URL` - Your n8n instance API URL (must end with `/api/v1`)
+- `N8N_API_KEY` - Your n8n API key (from Settings → API in n8n)
+
+**Option 1: Using .env file (recommended for local development)**
+
+```bash
+# Edit .env with your values
+N8N_API_URL=https://n8n.dev.company.com/api/v1
+N8N_API_KEY=your-dev-api-key
+
+# Add `.env` to your `.gitignore`:
+echo ".env" >> .gitignore
+```
+
+**Option 2: Using shell exports**
+
+```bash
+export N8N_API_URL="https://n8n.dev.company.com/api/v1"
+export N8N_API_KEY="your-dev-api-key"
+```
+
+### Categories Configuration
+
+Categories help organize workflows into folders in your repository:
+
+- **Define categories** in the `categories` array - customize for your project needs (e.g., `["business", "management", "shared"]`)
+
+- **Commit the config** - The `n8n.config.json` file with your categories should be committed so the team shares the same organization
+
+- **Tag workflows in n8n** - Only workflows with tags matching a category name will be pulled
+
+### Pull workflows from your n8n instance
+
+This creates workflow JSON files in your `workflowsDir`, organized by category.
+
+```bash
+# Pull all workflows with matching category tags
+n8n-workflow-cli pull
+
+# Pull only workflows tagged with "business"
+n8n-workflow-cli pull --category business
+```
+
+### Validate workflows
+
+```bash
+n8n-workflow-cli validate
+```
+
+### Make Changes and Deploy
+
+Edit workflow files locally, then deploy:
+
+```bash
+# deploy a specific workflow
+n8n-workflow-cli deploy workflows/business/my-workflow.json
+
+# deploy all workflows
+n8n-workflow-cli deploy
+```
+**Important:** New workflows are created as **inactive** for safety. You must:
+1. Verify the workflow in n8n UI
+
+2. Configure credentials and connections
+
+3. Test the workflow
+
+4. Manually activate it when ready
 
 ## Best Practices
 

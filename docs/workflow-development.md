@@ -1,6 +1,6 @@
 # Workflow Development Guide
 
-This guide provides best practices and guidelines for developing n8n workflows in the First-Stop-Health environment.
+This guide provides best practices and guidelines for developing n8n workflows.
 
 ## Workflow Structure Best Practices
 

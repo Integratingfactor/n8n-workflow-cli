@@ -13,22 +13,6 @@ A powerful CLI tool for managing n8n workflows across multiple environments with
 - ⚡ **Parallel deployment** - Deploy multiple workflows simultaneously
 - 🔍 **Dry-run mode** - Test deployments without making changes
 
-## Installation
-
-### Global Installation
-## Installation
-
-```bash
-npm install -g @integratingfactor/n8n-workflow-cli
-```
-
-## Quick Start
-
-### Project Installation
-```bash
-npm install --save-dev @integratingfactor/n8n-workflow-cli
-```
-
 ## Quick Start
 
 > 📖 **New to this tool?** See the detailed [Quick Start Guide](QUICKSTART.md) for step-by-step instructions.
