@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import { Config, Workflow, WorkflowListResponse, ExecutionResponse } from './types.js';
+import { Config, Workflow, WorkflowListResponse } from './types.js';
 
 export class N8nApiError extends Error {
   constructor(
@@ -197,18 +197,6 @@ export class N8nClient {
         throw error;
       }
       throw new N8nApiError(`Failed to deactivate workflow ${id}`, undefined, error);
-    }
-  }
-
-  async executeWorkflow(id: string): Promise<ExecutionResponse> {
-    try {
-      const response = await this.client.post<ExecutionResponse>(`/workflows/${id}/execute`);
-      return response.data;
-    } catch (error) {
-      if (error instanceof N8nApiError) {
-        throw error;
-      }
-      throw new N8nApiError(`Failed to execute workflow ${id}`, undefined, error);
     }
   }
 
