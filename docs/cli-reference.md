@@ -37,8 +37,22 @@ Create a `n8n.config.json` file in your workflow repository root:
 }
 ```
 
-Then set your environment variables:
+> **Important:** The `baseUrl` must include the `/api/v1` path (e.g., `https://n8n.example.com/api/v1`). This is validated automatically.
 
+Then set your environment variables using one of these methods:
+
+**Option 1: Using .env file (recommended for local development)**
+```bash
+# Create .env file (gitignored)
+cat > .env << 'EOF'
+N8N_DEV_URL=https://n8n.dev.company.com/api/v1
+N8N_DEV_API_KEY=your-dev-api-key
+N8N_PROD_URL=https://n8n.prod.company.com/api/v1
+N8N_PROD_API_KEY=your-prod-api-key
+EOF
+```
+
+**Option 2: Using shell exports (for CI/CD)**
 ```bash
 export N8N_DEV_URL="https://n8n.dev.company.com/api/v1"
 export N8N_DEV_API_KEY="your-dev-api-key"
@@ -46,7 +60,7 @@ export N8N_PROD_URL="https://n8n.prod.company.com/api/v1"
 export N8N_PROD_API_KEY="your-prod-api-key"
 ```
 
-> **Important:** The `n8n.config.json` file should be **committed to your repository**. It contains your categories and environment structure, but uses environment variables for secrets. This ensures your workflow organization is version-controlled while keeping API keys secure.
+> **Important:** The `n8n.config.json` file should be **committed to your repository**. It contains your categories and environment structure, but uses environment variables for secrets. The `.env` file is gitignored for security.
 
 ### Categories
 

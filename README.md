@@ -49,7 +49,23 @@ npm install --save-dev @integratingfactor/n8n-workflow-cli
 }
 ```
 
+> **Note:** The `baseUrl` must include the `/api/v1` path (e.g., `https://n8n.example.com/api/v1`). This is validated automatically.
+
 2. **Set environment variables** - Configure your n8n credentials:
+
+**Option 1: Using .env file (recommended for local development)**
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Edit .env with your values
+N8N_DEV_URL=https://n8n.dev.company.com/api/v1
+N8N_DEV_API_KEY=your-dev-api-key
+N8N_PROD_URL=https://n8n.prod.company.com/api/v1
+N8N_PROD_API_KEY=your-prod-api-key
+```
+
+**Option 2: Using shell exports (for CI/CD)**
 ```bash
 export N8N_DEV_URL="https://n8n.dev.company.com/api/v1"
 export N8N_DEV_API_KEY="your-dev-api-key"
@@ -57,7 +73,7 @@ export N8N_PROD_URL="https://n8n.prod.company.com/api/v1"
 export N8N_PROD_API_KEY="your-prod-api-key"
 ```
 
-> **💡 Important:** The `n8n.config.json` file should be **committed to your repository**. It contains your project's categories and environment structure, but uses environment variables for secrets. This way, your workflow organization is version-controlled while API keys remain secure.
+> **💡 Important:** The `n8n.config.json` file should be **committed to your repository**. It contains your project's categories and environment structure, but uses environment variables for secrets. The `.env` file is gitignored for security.
 
 ### Categories Configuration
 

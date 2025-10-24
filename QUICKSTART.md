@@ -43,7 +43,17 @@ cat > n8n.config.json << 'EOF'
 }
 EOF
 
-# Set environment variables
+# Set environment variables - choose one method:
+
+# Method 1: Create .env file (recommended for local development)
+cat > .env << 'EOF'
+N8N_DEV_URL=https://n8n.dev.company.com/api/v1
+N8N_DEV_API_KEY=your-dev-api-key
+N8N_PROD_URL=https://n8n.prod.company.com/api/v1
+N8N_PROD_API_KEY=your-prod-api-key
+EOF
+
+# Method 2: Export environment variables (for CI/CD)
 export N8N_DEV_URL="https://n8n.dev.company.com/api/v1"
 export N8N_DEV_API_KEY="your-dev-api-key"
 export N8N_PROD_URL="https://n8n.prod.company.com/api/v1"
@@ -54,7 +64,7 @@ git add n8n.config.json
 git commit -m "Add n8n configuration"
 ```
 
-> **Important:** The `n8n.config.json` file should be **committed to your repository**. It contains your categories and environment structure, but uses environment variables for secrets. This way, your team shares the same workflow organization while API keys remain secure.
+> **Important:** The `n8n.config.json` file should be **committed to your repository**. It contains your categories and environment structure, but uses environment variables for secrets. The `.env` file (if used) is gitignored for security.
 
 > **Categories:** Categories define which workflows are pulled and how they're organized:
 > - Only workflows with tags matching a category (e.g., `business`, `management`, `shared`) will be pulled
@@ -168,6 +178,7 @@ npm run dev -- list
 ```
 your-workflow-project/
 ├── n8n.config.json         # Config with categories (committed to repo)
+├── .env                    # Environment variables (gitignored)
 ├── workflows/              # Your workflows
 │   ├── business/
 │   ├── management/
@@ -177,8 +188,9 @@ your-workflow-project/
 
 ## Tips
 
-- **Security**: Keep API keys in environment variables, not in the config file
+- **Security**: Keep API keys in environment variables or `.env` file, never in the config file
 - **Commit Config**: The `n8n.config.json` should be committed with your project
+- **Use .env**: Create a `.env` file for local development, commit `.env.example` for team reference
 - **Environment Variables**: Use `${VAR_NAME}` syntax in config to reference env vars
 - **Categories**: Organize workflows into categories for better management
 - **Dry Run**: Always test with `--dry-run` before deploying to production

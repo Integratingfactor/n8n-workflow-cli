@@ -67,9 +67,9 @@ Configuration:
     "categories": ["business", "management", "shared"]
   }
   
-  Then set environment variables:
-  export N8N_DEV_URL="https://n8n.dev.company.com"
-  export N8N_DEV_API_KEY="your-api-key"
+  Set environment variables (use .env file or export):
+  N8N_DEV_URL=https://n8n.dev.company.com/api/v1
+  N8N_DEV_API_KEY=your-api-key
 
 For more information, visit: https://github.com/integratingfactor/n8n-workflow-cli
 `

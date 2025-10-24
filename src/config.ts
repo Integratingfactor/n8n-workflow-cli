@@ -1,9 +1,19 @@
 import { z } from 'zod';
 import fs from 'fs';
 import path from 'path';
+import { config as loadDotenv } from 'dotenv';
+
+// Load .env file if it exists
+loadDotenv();
 
 const EnvironmentConfigSchema = z.object({
-  baseUrl: z.string().url(),
+  baseUrl: z
+    .string()
+    .url()
+    .refine(
+      (url) => url.endsWith('/api/v1'),
+      'baseUrl must end with /api/v1 (e.g., https://n8n.example.com/api/v1)'
+    ),
   apiKey: z.string(),
 });
 
