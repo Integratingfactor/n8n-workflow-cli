@@ -81,13 +81,13 @@ Categories help organize workflows into folders in your repository:
 
 Example: A workflow tagged with `business` in n8n will be saved to `workflows/business/` when pulled.
 
-3. **Pull workflows** from an environment:
+3. **Pull workflows**:
 ```bash
 # Pull all workflows with matching category tags
-n8n-workflow-cli pull dev
+n8n-workflow-cli pull
 
 # Pull only workflows tagged with "business"
-n8n-workflow-cli pull dev --category business
+n8n-workflow-cli pull --category business
 ```
 
 4. **Validate workflows**:
@@ -97,7 +97,7 @@ n8n-workflow-cli validate
 
 5. **Deploy workflows**:
 ```bash
-n8n-workflow-cli deploy prod workflows/business/my-workflow.json
+n8n-workflow-cli deploy workflows/business/my-workflow.json
 ```
 
 ## Documentation

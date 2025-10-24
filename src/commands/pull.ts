@@ -92,12 +92,11 @@ export async function pullCommandHandler(options: PullOptions): Promise<void> {
 }
 
 export const pullCommand = new Command('pull')
-  .description('Pull workflows from n8n environment')
-  .argument('<environment>', 'Source environment')
+  .description('Pull workflows from n8n instance (uses N8N_API_URL and N8N_API_KEY)')
   .option('--category <category>', 'Only pull workflows from specific category')
-  .action(async (environment: string, options?: any) => {
+  .action(async (options?: any) => {
     const pullOptions: PullOptions = {
-      environment,
+      environment: 'default',
       category: options?.category,
     };
     await pullCommandHandler(pullOptions);

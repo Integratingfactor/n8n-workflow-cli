@@ -64,10 +64,10 @@ Before pulling, ensure your workflows in n8n are tagged with category names (e.g
 ### 4. Pull workflows from n8n
 ```bash
 # Pull all workflows with matching category tags
-n8n-workflow-cli pull dev
+n8n-workflow-cli pull
 
 # Pull only workflows tagged with "business"
-n8n-workflow-cli pull dev --category business
+n8n-workflow-cli pull --category business
 ```
 
 ### 5. Common commands
@@ -75,20 +75,20 @@ n8n-workflow-cli pull dev --category business
 # List all workflows
 n8n-workflow-cli list
 
-# List workflows in remote environment
-n8n-workflow-cli list --remote prod
+# List workflows in remote n8n instance
+n8n-workflow-cli list --remote
 
 # Validate all workflows
 n8n-workflow-cli validate
 
-# Deploy to production
-n8n-workflow-cli deploy prod
+# Deploy all workflows
+n8n-workflow-cli deploy
 
 # Deploy specific workflow
-n8n-workflow-cli deploy prod workflows/business/my-workflow.json
+n8n-workflow-cli deploy workflows/business/my-workflow.json
 
 # Dry run (test without changes)
-n8n-workflow-cli deploy prod --dry-run
+n8n-workflow-cli deploy --dry-run
 ```
 
 ## For Contributors (Cloning the repo)
@@ -116,7 +116,7 @@ npm run dev -- --help
 # Test commands without building
 npm run dev -- list
 npm run dev -- validate
-npm run dev -- deploy dev --dry-run
+npm run dev -- deploy --dry-run
 ```
 
 ### 4. Test with your n8n instance
@@ -127,13 +127,13 @@ export N8N_API_URL="https://your-n8n.com/api/v1"
 export N8N_API_KEY="your-key-here"
 
 # Test pulling workflows (use npm run dev -- for all commands)
-npm run dev -- pull dev
+npm run dev -- pull
 
 # Test deploying
-npm run dev -- deploy dev --dry-run
+npm run dev -- deploy --dry-run
 
 # Test listing with remote
-npm run dev -- list --remote dev
+npm run dev -- list --remote
 ```
 
 ### 5. Link globally for testing

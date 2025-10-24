@@ -319,14 +319,13 @@ export async function deployCommandHandler(options: DeployOptions): Promise<void
 }
 
 export const deployCommand = new Command('deploy')
-  .description('Deploy workflows to an n8n environment')
-  .argument('<environment>', 'Target environment (dev, staging, prod)')
+  .description('Deploy workflows to n8n instance (uses N8N_API_URL and N8N_API_KEY)')
   .argument('[workflow]', 'Specific workflow file to deploy (optional)')
   .option('--dry-run', 'Preview changes without applying them')
   .option('--parallel', 'Deploy workflows in parallel for faster execution')
-  .action(async (environment: string, workflow?: string, options?: any) => {
+  .action(async (workflow?: string, options?: any) => {
     const deployOptions: DeployOptions = {
-      environment,
+      environment: 'default',
       workflow,
       dryRun: options?.dryRun || false,
       parallel: options?.parallel || false,

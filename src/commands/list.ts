@@ -96,10 +96,10 @@ export async function listCommandHandler(options: ListOptions): Promise<void> {
 
 export const listCommand = new Command('list')
   .description('List local and remote workflows')
-  .option('--remote <environment>', 'Also list workflows from remote environment')
+  .option('--remote', 'Also list workflows from remote n8n instance (uses N8N_API_URL)')
   .action(async (options?: any) => {
     const listOptions: ListOptions = {
-      environment: options?.remote,
+      environment: 'default',
       remote: !!options?.remote,
     };
     await listCommandHandler(listOptions);

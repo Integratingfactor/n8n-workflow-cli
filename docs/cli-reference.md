@@ -76,11 +76,8 @@ Pull workflows from n8n instance to local files.
 
 **Usage:**
 ```bash
-n8n-workflow-cli pull <environment> [options]
+n8n-workflow-cli pull [options]
 ```
-
-**Arguments:**
-- `environment`: Target environment (dev, prod, staging, etc.)
 
 **Options:**
 - `--category <category>`: Filter to only pull workflows with this specific category tag (must be defined in config)
@@ -94,13 +91,13 @@ n8n-workflow-cli pull <environment> [options]
 **Examples:**
 ```bash
 # Pull all workflows with matching category tags
-n8n-workflow-cli pull dev
+n8n-workflow-cli pull
 
 # Pull only workflows tagged with "business"
-n8n-workflow-cli pull dev --category business
+n8n-workflow-cli pull --category business
 
 # Pull only workflows tagged with "management"
-n8n-workflow-cli pull prod --category management
+n8n-workflow-cli pull --category management
 ```
 
 ### `deploy`
@@ -108,11 +105,10 @@ Deploy workflows from local files to n8n instance.
 
 **Usage:**
 ```bash
-n8n-workflow-cli deploy <environment> [workflow] [options]
+n8n-workflow-cli deploy [workflow] [options]
 ```
 
 **Arguments:**
-- `environment`: Target environment (dev, prod, staging, etc.)
 - `workflow`: Optional specific workflow file path
 
 **Options:**
@@ -121,17 +117,16 @@ n8n-workflow-cli deploy <environment> [workflow] [options]
 
 **Examples:**
 ```bash
-n8n-workflow-cli deploy dev
-n8n-workflow-cli deploy prod workflows/business/my-workflow.json
-n8n-workflow-cli deploy dev --dry-run
-n8n-workflow-cli deploy prod --parallel
+n8n-workflow-cli deploy
+n8n-workflow-cli deploy workflows/business/my-workflow.json
+n8n-workflow-cli deploy --dry-run
+n8n-workflow-cli deploy --parallel
 ```
 
 ### List workflows
 ```bash
 n8n-workflow-cli list
-n8n-workflow-cli list --remote dev
-n8n-workflow-cli list --remote prod
+n8n-workflow-cli list --remote
 ```
 
 ### Validate workflows
@@ -150,13 +145,12 @@ n8n-workflow-cli list [options]
 ```
 
 **Options:**
-- `--remote <environment>`: List workflows from n8n instance instead of local files
+- `--remote`: List workflows from n8n instance instead of local files
 
 **Examples:**
 ```bash
 n8n-workflow-cli list
-n8n-workflow-cli list --remote dev
-n8n-workflow-cli list --remote prod
+n8n-workflow-cli list --remote
 ```
 
 ### `validate`
@@ -214,13 +208,13 @@ npm run dev -- <command> [options]
   run: |
     npm install -g @integratingfactor/n8n-workflow-cli
     n8n-workflow-cli validate
-    n8n-workflow-cli deploy prod --parallel
+    n8n-workflow-cli deploy --parallel
 ```
 
 ## Docker Example
 
 ```bash
-docker run --rm -v $(pwd)/config:/app/config n8n-workflow-cli deploy prod
+docker run --rm -v $(pwd)/config:/app/config n8n-workflow-cli deploy
 ```
 
 ## Help
