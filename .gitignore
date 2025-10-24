@@ -64,6 +64,7 @@ Desktop.ini
 
 # Test and local workflow files
 workflows/**
+n8n.config.json
 
 # Coverage reports (if tests are added)
 coverage/
