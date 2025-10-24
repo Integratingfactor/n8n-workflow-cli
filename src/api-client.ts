@@ -72,9 +72,15 @@ export class N8nClient {
 
   async createWorkflow(workflow: Workflow): Promise<Workflow> {
     try {
-      // Remove id field for creation
-      const { id, ...workflowData } = workflow;
-      const response = await this.client.post<Workflow>('/workflows', workflowData);
+      // Only include fields that are accepted by the n8n API for workflow creation
+      // Based on API spec: https://docs.n8n.io/api/api-reference/#tag/workflow/post/workflows
+      const allowedFields = ['name', 'nodes', 'connections', 'settings', 'staticData'];
+
+      const cleanData: any = Object.fromEntries(
+        Object.entries(workflow).filter(([key]) => allowedFields.includes(key))
+      );
+
+      const response = await this.client.post<Workflow>('/workflows', cleanData);
       return response.data;
     } catch (error) {
       if (error instanceof N8nApiError) {
@@ -87,18 +93,12 @@ export class N8nClient {
   async updateWorkflow(id: string, workflow: Workflow): Promise<Workflow> {
     try {
       // Only include fields that are explicitly supported by n8n API for updates
-      // Based on the official API documentation and testing
-      const allowedFields = [
-        'name',
-        'nodes',
-        'connections',
-        'settings',
-        'staticData',
-        'shared',
-        // Note: 'active' and 'tags' are read-only for updates
-      ];
+      // Based on the official API documentation:
+      // - 'shared' is read-only and managed by n8n
+      // - 'active' and 'tags' are also read-only for updates
+      const allowedFields = ['name', 'nodes', 'connections', 'settings', 'staticData'];
 
-      const updateData = Object.fromEntries(
+      const updateData: any = Object.fromEntries(
         Object.entries(workflow).filter(([key]) => allowedFields.includes(key))
       );
 
@@ -173,6 +173,30 @@ export class N8nClient {
         throw error;
       }
       throw new N8nApiError(`Failed to create tag: ${error}`);
+    }
+  }
+
+  async activateWorkflow(id: string): Promise<Workflow> {
+    try {
+      const response = await this.client.post<Workflow>(`/workflows/${id}/activate`);
+      return response.data;
+    } catch (error) {
+      if (error instanceof N8nApiError) {
+        throw error;
+      }
+      throw new N8nApiError(`Failed to activate workflow ${id}`, undefined, error);
+    }
+  }
+
+  async deactivateWorkflow(id: string): Promise<Workflow> {
+    try {
+      const response = await this.client.post<Workflow>(`/workflows/${id}/deactivate`);
+      return response.data;
+    } catch (error) {
+      if (error instanceof N8nApiError) {
+        throw error;
+      }
+      throw new N8nApiError(`Failed to deactivate workflow ${id}`, undefined, error);
     }
   }
 
