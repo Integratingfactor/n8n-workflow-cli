@@ -16,10 +16,44 @@ cd n8n-workflow-cli
 npm install
 ```
 
+## Configuration
+
+Create a `.n8n-cli.config.json` file in your project root:
+
+```json
+{
+  "environments": {
+    "dev": {
+      "baseUrl": "https://n8n.dev.company.com",
+      "apiKey": "${N8N_DEV_API_KEY}"
+    },
+    "prod": {
+      "baseUrl": "https://n8n.prod.company.com",
+      "apiKey": "${N8N_PROD_API_KEY}"
+    }
+  },
+  "workflowsDir": "./workflows",
+  "categories": ["business", "management", "shared"]
+}
+```
+
+### Categories
+
+Categories organize workflows into folders and control which workflows are pulled:
+
+- **Define categories** in the `categories` array - customize for your project (e.g., `["api", "automation", "monitoring", "integration"]`)
+- **Tag workflows in n8n** - Workflows must have a tag matching a category name to be pulled
+- **Folder structure** - Workflows are saved to `workflows/<category>/` based on their tag
+- **Different per project** - Each repository can define its own categories to organize workflows differently
+
+**Example:** If your config has `"categories": ["api", "backend"]` and a workflow in n8n is tagged with `api`, it will be pulled to `workflows/api/workflow-name.json`.
+
 ## Command Details
 
 ### `pull`
 Pull workflows from n8n instance to local files.
+
+**Important:** Only workflows with tags matching categories defined in `.n8n-cli.config.json` will be pulled. Workflows without matching category tags are skipped.
 
 **Usage:**
 ```bash
@@ -30,12 +64,24 @@ n8n-workflow-cli pull <environment> [options]
 - `environment`: Target environment (dev, prod, staging, etc.)
 
 **Options:**
-- `--category <category>`: Filter by workflow category
+- `--category <category>`: Filter to only pull workflows with this specific category tag (must be defined in config)
+
+**Category Behavior:**
+1. Categories must be defined in `.n8n-cli.config.json` (e.g., `"categories": ["business", "management", "shared"]`)
+2. Only workflows with a tag exactly matching a category name will be pulled
+3. Workflows are saved to `workflows/<category>/` folders
+4. Use `--category` to narrow the pull to a specific category
 
 **Examples:**
 ```bash
+# Pull all workflows with matching category tags
 n8n-workflow-cli pull dev
-n8n-workflow-cli pull prod --category migration
+
+# Pull only workflows tagged with "business"
+n8n-workflow-cli pull dev --category business
+
+# Pull only workflows tagged with "management"
+n8n-workflow-cli pull prod --category management
 ```
 
 ### `deploy`

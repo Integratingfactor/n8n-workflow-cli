@@ -161,40 +161,21 @@ export async function validateAllWorkflows(projectRoot: string): Promise<{
   return results;
 }
 
-export function determineCategory(workflow: any): string {
-  // First, check if workflow has tags that match category names
+export function determineCategory(workflow: any, categories: string[] = ['business', 'management', 'shared']): string | null {
+  // Only check if workflow has tags that match category names
   if (workflow.tags && Array.isArray(workflow.tags)) {
     const tagNames = workflow.tags.map((tag: any) => tag.name.toLowerCase());
 
     // Check for exact category matches in tags
-    if (tagNames.includes('management')) return 'management';
-    if (tagNames.includes('shared')) return 'shared';
-    if (tagNames.includes('business')) return 'business';
-
-    // Check for partial matches
-    for (const tagName of tagNames) {
-      if (tagName.includes('management') || tagName.includes('admin')) {
-        return 'management';
-      }
-      if (tagName.includes('shared') || tagName.includes('common')) {
-        return 'shared';
+    for (const category of categories) {
+      if (tagNames.includes(category.toLowerCase())) {
+        return category;
       }
     }
   }
 
-  // Fallback to workflow name-based categorization
-  const name = workflow.name?.toLowerCase() || '';
-
-  if (name.includes('management') || name.includes('admin')) {
-    return 'management';
-  }
-
-  if (name.includes('shared') || name.includes('common')) {
-    return 'shared';
-  }
-
-  // Default to business category
-  return 'business';
+  // Return null if no matching category found
+  return null;
 }
 
 export function saveWorkflowToFile(workflow: any, category: string, projectRoot?: string): string {

@@ -57,9 +57,23 @@ Example `.n8n-cli.config.json`:
 
 > **Note:** The config file is gitignored to protect your API keys. Use environment variables like `${N8N_DEV_API_KEY}` for sensitive data.
 
+### Categories Configuration
+
+Categories help organize workflows into folders in your repository:
+
+- **Define categories** in the `categories` array - customize for your project needs (e.g., `["api", "automation", "monitoring"]`)
+- **Tag workflows in n8n** - Only workflows with tags matching a category name will be pulled
+- **Filter by category** - Use `--category` option to pull only specific category workflows
+
+Example: A workflow tagged with `business` in n8n will be saved to `workflows/business/` when pulled.
+
 2. **Pull workflows** from an environment:
 ```bash
+# Pull all workflows with matching category tags
 n8n-workflow-cli pull dev
+
+# Pull only workflows tagged with "business"
+n8n-workflow-cli pull dev --category business
 ```
 
 3. **Validate workflows**:

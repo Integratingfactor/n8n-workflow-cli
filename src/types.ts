@@ -77,10 +77,8 @@ export type WorkflowListResponse = z.infer<typeof WorkflowListResponseSchema>;
 export type WorkflowExecution = z.infer<typeof WorkflowExecutionSchema>;
 export type Config = z.infer<typeof ConfigSchema>;
 
-// Workflow categories
-export type WorkflowCategory = 'business' | 'management' | 'shared';
-
-export const WORKFLOW_CATEGORIES: WorkflowCategory[] = ['business', 'management', 'shared'];
+// Workflow categories - can be any string, not limited to predefined values
+export type WorkflowCategory = string;
 
 // CLI Options
 export interface DeployOptions {

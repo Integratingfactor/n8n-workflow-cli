@@ -100,4 +100,9 @@ export const configManager = {
   getProjectRoot: () => {
     return process.cwd();
   },
+
+  getCategories: () => {
+    const config = loadConfig();
+    return config.categories;
+  },
 };
