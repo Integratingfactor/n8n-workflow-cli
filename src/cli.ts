@@ -3,18 +3,27 @@
 import { Command } from 'commander';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { deployCommand } from './commands/deploy.js';
 import { executeCommand } from './commands/execute.js';
 import { listCommand } from './commands/list.js';
 import { pullCommand } from './commands/pull.js';
 import { validateCommand } from './commands/validate.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Read version from package.json
+const packageJsonPath = path.join(__dirname, '../package.json');
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+const version = packageJson.version;
+
 const program = new Command();
 
 program
   .name('n8n-workflow-cli')
   .description('CLI tool for managing n8n workflows across environments')
-  .version('1.0.0');
+  .version(version);
 
 // Add helpful information about configuration
 program.hook('preAction', () => {
