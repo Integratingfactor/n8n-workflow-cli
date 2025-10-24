@@ -70,46 +70,89 @@ async function deployWorkflow(
           message: `Updated: ${relativePath} (ID: ${updated.id})`,
         };
       } catch (error: any) {
-        // If workflow was deleted from n8n (404), create it as new
+        // If workflow was deleted from n8n (404), check if it exists with a different ID
         if (error.statusCode === 404 || error.message?.includes('Not Found')) {
           const oldId = workflow.id;
-          const wasActive = workflow.active === true;
-          const created = await client.createWorkflow(workflow);
+          
+          // Check if workflow exists by name (might have been recreated by someone else)
+          const existingWorkflows = await client.listWorkflows();
+          const existingWorkflow = existingWorkflows.find((w) => w.name === workflow.name);
 
-          // Update local file with new ID
-          workflow.id = created.id;
-          const fs = await import('fs/promises');
-          const cleanedWorkflow = cleanWorkflowForSaving(workflow);
-          await fs.writeFile(filePath, JSON.stringify(cleanedWorkflow, null, 2) + '\n', 'utf-8');
+          if (existingWorkflow && existingWorkflow.id) {
+            // Found existing workflow with same name but different ID - update it
+            workflow.id = existingWorkflow.id;
+            const updated = await client.updateWorkflow(workflow.id, workflow);
 
-          // Update workflow tags if they exist
-          if (workflow.tags && workflow.tags.length > 0 && created.id) {
-            const existingTags = await client.listTags();
-            const tagNameToId = new Map(existingTags.map((tag) => [tag.name, tag.id]));
+            // Update local file with the correct ID
+            const fs = await import('fs/promises');
+            const cleanedWorkflow = cleanWorkflowForSaving(workflow);
+            await fs.writeFile(filePath, JSON.stringify(cleanedWorkflow, null, 2) + '\n', 'utf-8');
 
-            const tagIds: string[] = [];
-            for (const tag of workflow.tags) {
-              const tagName = tag.name;
-              if (tagNameToId.has(tagName)) {
-                tagIds.push(tagNameToId.get(tagName)!);
-              } else {
-                const newTag = await client.createTag(tagName);
-                tagIds.push(newTag.id);
+            // Update workflow tags if they exist
+            if (workflow.tags && workflow.tags.length > 0 && updated.id) {
+              const existingTags = await client.listTags();
+              const tagNameToId = new Map(existingTags.map((tag) => [tag.name, tag.id]));
+
+              const tagIds: string[] = [];
+              for (const tag of workflow.tags) {
+                const tagName = tag.name;
+                if (tagNameToId.has(tagName)) {
+                  tagIds.push(tagNameToId.get(tagName)!);
+                } else {
+                  const newTag = await client.createTag(tagName);
+                  tagIds.push(newTag.id);
+                }
               }
+
+              await client.updateWorkflowTags(updated.id, tagIds);
             }
 
-            await client.updateWorkflowTags(created.id, tagIds);
-          }
+            return {
+              success: true,
+              message: `Updated: ${relativePath} (ID changed: ${oldId} -> ${updated.id})`,
+            };
+          } else {
+            // Workflow truly doesn't exist - create it as inactive for safety
+            const wasActive = workflow.active === true;
+            
+            // Force workflow to be inactive when creating
+            workflow.active = false;
+            const created = await client.createWorkflow(workflow);
 
-          // Activate workflow if it was active before
-          if (wasActive && created.id) {
-            await client.activateWorkflow(created.id);
-          }
+            // Update local file with new ID
+            workflow.id = created.id;
+            // Restore the original active state in the local file
+            workflow.active = wasActive;
+            const fs = await import('fs/promises');
+            const cleanedWorkflow = cleanWorkflowForSaving(workflow);
+            await fs.writeFile(filePath, JSON.stringify(cleanedWorkflow, null, 2) + '\n', 'utf-8');
 
-          return {
-            success: true,
-            message: `Recreated: ${relativePath} (old ID: ${oldId}, new ID: ${created.id})${wasActive ? ' [activated]' : ''}`,
-          };
+            // Update workflow tags if they exist
+            if (workflow.tags && workflow.tags.length > 0 && created.id) {
+              const existingTags = await client.listTags();
+              const tagNameToId = new Map(existingTags.map((tag) => [tag.name, tag.id]));
+
+              const tagIds: string[] = [];
+              for (const tag of workflow.tags) {
+                const tagName = tag.name;
+                if (tagNameToId.has(tagName)) {
+                  tagIds.push(tagNameToId.get(tagName)!);
+                } else {
+                  const newTag = await client.createTag(tagName);
+                  tagIds.push(newTag.id);
+                }
+              }
+
+              await client.updateWorkflowTags(created.id, tagIds);
+            }
+
+            // Note: New workflows are created as inactive - user must manually activate in n8n UI
+
+            return {
+              success: true,
+              message: `Recreated: ${relativePath} (old ID: ${oldId}, new ID: ${created.id}) [inactive - activate manually in n8n]`,
+            };
+          }
         }
         // Re-throw other errors
         throw error;
@@ -158,12 +201,17 @@ async function deployWorkflow(
         };
       }
 
-      // Create new workflow
+      // Create new workflow (always inactive for safety)
       const wasActive = workflow.active === true;
+      
+      // Force workflow to be inactive when creating
+      workflow.active = false;
       const created = await client.createWorkflow(workflow);
 
       // Update local file with new ID
       workflow.id = created.id;
+      // Restore the original active state in the local file
+      workflow.active = wasActive;
       const fs = await import('fs/promises');
       const cleanedWorkflow = cleanWorkflowForSaving(workflow);
       await fs.writeFile(filePath, JSON.stringify(cleanedWorkflow, null, 2) + '\n', 'utf-8');
@@ -192,14 +240,11 @@ async function deployWorkflow(
         await client.updateWorkflowTags(created.id, tagIds);
       }
 
-      // Activate workflow if it was active before
-      if (wasActive && created.id) {
-        await client.activateWorkflow(created.id);
-      }
+      // Note: New workflows are created as inactive - user must manually activate in n8n UI
 
       return {
         success: true,
-        message: `Created: ${relativePath} (ID: ${created.id})${wasActive ? ' [activated]' : ''}`,
+        message: `Created: ${relativePath} (ID: ${created.id}) [inactive - activate manually in n8n]`,
       };
     }
   } catch (error) {

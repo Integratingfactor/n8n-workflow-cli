@@ -1,0 +1,60 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [1.1.1] - Safety during workflow creation
+
+### Changed
+- **BREAKING (Safety Feature)**: New workflows are now created as inactive by default
+  - When deploying a workflow that doesn't exist in n8n yet, it will be created as inactive
+  - This applies to both new workflows and workflows being recreated after 404 errors
+  - Users must manually verify, configure credentials, test, and activate workflows in the n8n UI
+  - This prevents untested workflows from running automatically
+
+### Fixed
+- Fixed corner case bug in 404 handling: when a workflow is deleted and recreated by someone else with a different ID, deploy now correctly detects the existing workflow by name and updates it instead of creating a duplicate
+
+## [1.1.0] - Simplify configurations
+
+### Changed
+- **BREAKING**: Simplified configuration structure
+  - Renamed `.n8n-cli.config.json` to `n8n.config.json` (no leading dot)
+  - Removed nested `environments` object from config file
+  - Config now only contains workflow organization settings (workflowsDir, categories)
+  - Simplified to use only 2 environment variables: `N8N_API_URL` and `N8N_API_KEY`
+  - Removed environment parameter from all CLI commands (pull, deploy, list)
+- Added `.env` file support for convenient local environment variable management
+- Added URL validation to ensure `N8N_API_URL` ends with `/api/v1`
+- Removed migration and deployment guides (no longer needed with simplified config)
+
+### Added
+- dotenv package for .env file support
+- .env.example template file
+
+## [1.0.3] - Remove invalid `execute` command
+
+### Removed
+- Removed `execute` command (n8n API doesn't support direct workflow execution)
+
+## [1.0.2] - Fix bug in version detection
+
+### Changed
+- Fixed version display in CLI to read from package.json instead of hardcoded value
+- Updated package scope from @company to @integratingfactor
+
+### Added
+- Duplicate workflow prevention: checks for existing workflows by name before creating
+- Clean workflow files: removed read-only timestamp fields (createdAt, updatedAt, versionId, isArchived)
+- Configurable categories: categories are now loaded from n8n.config.json
+- Tag-based filtering: pull command only pulls workflows with tags matching configured categories
+- Category option as filter: --category option now filters workflows instead of setting default
+
+## [1.0.0] - Initial Release
+
+### Added
+- Initial release with core functionality
+- Deploy command for pushing workflows to n8n
+- Pull command for fetching workflows from n8n
+- List command for viewing local and remote workflows
+- Validate command for checking workflow configuration
+- MIT License
