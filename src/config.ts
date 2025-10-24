@@ -1,27 +1,24 @@
 import { z } from 'zod';
 import fs from 'fs';
 import path from 'path';
+import { config as loadDotenv } from 'dotenv';
 
-const EnvironmentConfigSchema = z.object({
-  baseUrl: z.string().url(),
-  apiKey: z.string(),
-});
+// Load .env file if it exists
+loadDotenv();
 
 const ConfigSchema = z.object({
-  environments: z.record(EnvironmentConfigSchema),
   workflowsDir: z.string().optional().default('./workflows'),
   categories: z.array(z.string()).optional().default(['business', 'management', 'shared']),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
-export type EnvironmentConfig = z.infer<typeof EnvironmentConfigSchema>;
 
 export function loadConfig(): Config {
   // Look for config in current working directory first, then parent directories
   const configPaths = [
-    '.n8n-cli.config.json',
-    path.join(process.cwd(), '.n8n-cli.config.json'),
-    path.join(process.cwd(), '..', '.n8n-cli.config.json'),
+    'n8n.config.json',
+    path.join(process.cwd(), 'n8n.config.json'),
+    path.join(process.cwd(), '..', 'n8n.config.json'),
   ];
 
   for (const configPath of configPaths) {
@@ -43,7 +40,7 @@ export function loadConfig(): Config {
   }
 
   throw new Error(
-    'Configuration file .n8n-cli.config.json not found. Please create one in your project directory.'
+    'Configuration file n8n.config.json not found. Please create one in your project directory.'
   );
 }
 
@@ -52,7 +49,9 @@ function resolveEnvironmentVariables(obj: any): any {
     return obj.replace(/\$\{([^}]+)\}/g, (match, envVar) => {
       const value = process.env[envVar];
       if (!value) {
-        throw new Error(`Environment variable ${envVar} is not set`);
+        throw new Error(
+          `Environment variable ${envVar} is not set. Please set it before running the CLI:\n  export ${envVar}="your-value"`
+        );
       }
       return value;
     });
@@ -73,18 +72,31 @@ function resolveEnvironmentVariables(obj: any): any {
   return obj;
 }
 
-export function getEnvironmentConfig(environment: string): EnvironmentConfig {
-  const config = loadConfig();
-  const envConfig = config.environments[environment];
+export function getEnvironmentConfig(_environmentName: string) {
+  // Get URL and API key from simple environment variables
+  const baseUrl = process.env.N8N_API_URL;
+  const apiKey = process.env.N8N_API_KEY;
 
-  if (!envConfig) {
-    const availableEnvs = Object.keys(config.environments).join(', ');
+  if (!baseUrl) {
     throw new Error(
-      `Environment '${environment}' not found. Available environments: ${availableEnvs}`
+      `Environment variable N8N_API_URL is not set. Please set it before running the CLI:\n  export N8N_API_URL="https://n8n.example.com/api/v1"`
     );
   }
 
-  return envConfig;
+  if (!apiKey) {
+    throw new Error(
+      `Environment variable N8N_API_KEY is not set. Please set it before running the CLI:\n  export N8N_API_KEY="your-api-key"`
+    );
+  }
+
+  // Validate URL ends with /api/v1
+  if (!baseUrl.endsWith('/api/v1')) {
+    throw new Error(
+      `Invalid N8N_API_URL: must end with /api/v1 (e.g., https://n8n.example.com/api/v1). Current value: ${baseUrl}`
+    );
+  }
+
+  return { baseUrl, apiKey };
 }
 
 // Configuration manager for CLI commands

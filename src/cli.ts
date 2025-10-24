@@ -27,9 +27,9 @@ program
 // Add helpful information about configuration
 program.hook('preAction', () => {
   // Check if config exists
-  const configPath = path.join(process.cwd(), '.n8n-cli.config.json');
+  const configPath = path.join(process.cwd(), 'n8n.config.json');
   if (!fs.existsSync(configPath)) {
-    console.log('ℹ️  Configuration file .n8n-cli.config.json not found in current directory.');
+    console.log('ℹ️  Configuration file n8n.config.json not found in current directory.');
     console.log('   Create one with your n8n environment settings to get started.');
     console.log(
       '   See documentation: https://github.com/integratingfactor/n8n-workflow-cli#configuration'
@@ -48,24 +48,26 @@ program.addHelpText(
   'after',
   `
 Examples:
-  $ n8n-workflow-cli pull dev                    # Pull workflows from dev environment
+  $ n8n-workflow-cli pull                        # Pull workflows from n8n
   $ n8n-workflow-cli validate                    # Validate all workflow files
-  $ n8n-workflow-cli deploy prod workflow.json   # Deploy specific workflow to prod
-  $ n8n-workflow-cli deploy prod --dry-run       # Test deployment without changes
-  $ n8n-workflow-cli list --remote prod          # List workflows in prod environment
+  $ n8n-workflow-cli deploy workflow.json        # Deploy specific workflow
+  $ n8n-workflow-cli deploy --dry-run            # Test deployment without changes
+  $ n8n-workflow-cli list --remote               # List workflows in n8n instance
 
 Configuration:
-  Create .n8n-cli.config.json in your project root:
+  Create n8n.config.json in your project root:
   {
-    "environments": {
-      "dev": {
-        "baseUrl": "https://n8n.dev.company.com",
-        "apiKey": "\${N8N_DEV_API_KEY}"
-      }
-    },
     "workflowsDir": "./workflows",
     "categories": ["business", "management", "shared"]
   }
+  
+  Set environment variables (use .env file or export):
+  N8N_API_URL=https://n8n.example.com/api/v1
+  N8N_API_KEY=your-api-key
+  
+  Switch environments by changing these variables:
+  export N8N_API_URL="https://n8n.dev.example.com/api/v1"    # for dev
+  export N8N_API_URL="https://n8n.prod.example.com/api/v1"   # for prod
 
 For more information, visit: https://github.com/integratingfactor/n8n-workflow-cli
 `

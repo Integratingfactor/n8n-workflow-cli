@@ -161,7 +161,10 @@ export async function validateAllWorkflows(projectRoot: string): Promise<{
   return results;
 }
 
-export function determineCategory(workflow: any, categories: string[] = ['business', 'management', 'shared']): string | null {
+export function determineCategory(
+  workflow: any,
+  categories: string[] = ['business', 'management', 'shared']
+): string | null {
   // Only check if workflow has tags that match category names
   if (workflow.tags && Array.isArray(workflow.tags)) {
     const tagNames = workflow.tags.map((tag: any) => tag.name.toLowerCase());
