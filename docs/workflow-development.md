@@ -92,7 +92,7 @@ Before creating a workflow:
 After testing:
 ```bash
 # Pull the workflow from n8n
-./scripts/pull-workflows.sh test
+n8n-workflow-cli pull
 
 # Verify the changes
 git status
@@ -116,11 +116,8 @@ Before deploying to production:
 
 Deploy to production after approval:
 ```bash
-# Deploy to production
-./scripts/deploy-workflows.sh production
-
-# For management workflows, execute if needed
-./scripts/execute-workflow.sh production db-create-tables
+# Deploy to production (make sure N8N_API_URL & N8N_API_KEY are set to PROD)
+n8n-workflow-cli deploy
 ```
 
 ## Error Handling
@@ -246,7 +243,7 @@ Before committing:
 
 ```bash
 # Validate JSON structure
-./scripts/validate-workflows.sh
+n8n-workflow-cli validate
 ```
 
 ## Documentation

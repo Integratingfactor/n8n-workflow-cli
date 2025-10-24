@@ -149,7 +149,7 @@ npm run build
 # Run commands directly without building
 npm run dev -- list
 npm run dev -- --help
-npm run dev -- deploy dev --dry-run
+npm run dev -- deploy --dry-run
 
 # Or use the built version
 node dist/cli.js --help
@@ -163,7 +163,7 @@ export N8N_DEV_URL="https://your-n8n-dev.com/api/v1"
 export N8N_DEV_API_KEY="your-api-key-here"
 
 # Try pulling workflows
-npm run dev -- pull dev
+npm run dev -- pull
 ```
 
 5. **Link globally for testing:**

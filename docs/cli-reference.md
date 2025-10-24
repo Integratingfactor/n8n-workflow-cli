@@ -181,12 +181,7 @@ npm run dev -- <command> [options]
 
 ## Environment Setup
 
-1. Copy template:
-   ```bash
-   cp config/template.env config/test.env
-   ```
-
-2. Edit config with your n8n details:
+1. Set environment variables with your n8n details:
    - `N8N_API_URL`: API endpoint
    - `N8N_API_KEY`: API key from n8n Settings
 

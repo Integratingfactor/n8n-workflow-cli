@@ -189,14 +189,14 @@ You're trying to run `npm run deploy` which doesn't exist. Use one of these inst
 
 **If you're developing (cloned the repo):**
 ```bash
-npm run dev -- deploy dev          # Correct
-npm run deploy -- dev              # ❌ Wrong
+npm run dev -- deploy          # Correct
+npm run deploy                 # ❌ Wrong
 ```
 
 **If you installed globally:**
 ```bash
-n8n-workflow-cli deploy dev        # Correct
-npm run deploy dev                 # ❌ Wrong
+n8n-workflow-cli deploy        # Correct
+npm run deploy                 # ❌ Wrong
 ```
 
 ### "Configuration file not found"
