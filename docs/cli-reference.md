@@ -62,13 +62,6 @@ n8n-workflow-cli deploy dev --dry-run
 n8n-workflow-cli deploy prod --parallel
 ```
 
-### Execute a workflow
-```bash
-n8n-workflow-cli execute <environment> <workflow>
-n8n-workflow-cli execute dev "My Workflow"
-n8n-workflow-cli execute prod "Data Sync" --wait
-```
-
 ### List workflows
 ```bash
 n8n-workflow-cli list
@@ -82,27 +75,6 @@ n8n-workflow-cli validate
 ```
 
 ## Command Details (continued)
-
-### `execute`
-Execute a workflow on n8n instance.
-
-**Usage:**
-```bash
-n8n-workflow-cli execute <environment> <workflowName> [options]
-```
-
-**Arguments:**
-- `environment`: Target environment (dev, prod, staging, etc.)
-- `workflowName`: Name of the workflow to execute (use quotes if it contains spaces)
-
-**Options:**
-- `--wait`: Wait for execution to complete
-
-**Examples:**
-```bash
-n8n-workflow-cli execute dev "Create Tables"
-n8n-workflow-cli execute prod "Data Migration" --wait
-```
 
 ### `list`
 List workflows locally or from n8n instance.
@@ -197,7 +169,6 @@ Examples:
 ```bash
 n8n-workflow-cli pull --help
 n8n-workflow-cli deploy --help
-n8n-workflow-cli execute --help
 n8n-workflow-cli list --help
 n8n-workflow-cli validate --help
 ```

@@ -18,14 +18,17 @@ export async function executeCommandHandler(options: ExecuteOptions): Promise<vo
     // Find workflow by name or ID
     let workflowId: string;
 
-    if (/^\d+$/.test(options.workflow)) {
-      // It's a numeric ID
-      workflowId = options.workflow;
-      spinner.text = `Executing workflow ID: ${workflowId}`;
+    spinner.text = 'Searching for workflow...';
+    const workflows = await client.listWorkflows();
+    
+    // First try to find by exact ID match
+    const foundById = workflows.find((w) => w.id === options.workflow);
+    
+    if (foundById) {
+      workflowId = foundById.id!;
+      spinner.text = `Executing workflow: ${foundById.name} (ID: ${workflowId})`;
     } else {
       // Search by name
-      spinner.text = 'Searching for workflow...';
-      const workflows = await client.listWorkflows();
       const found = workflows.find((w) =>
         w.name.toLowerCase().includes(options.workflow.toLowerCase())
       );

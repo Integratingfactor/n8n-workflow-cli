@@ -10,7 +10,6 @@ A powerful CLI tool for managing n8n workflows across multiple environments with
 - 🔄 **Pull/Push workflows** - Sync workflows between environments
 - ⚡ **Parallel deployment** - Deploy multiple workflows simultaneously
 - 🔍 **Dry-run mode** - Test deployments without making changes
-- 📊 **Workflow execution** - Execute and monitor workflow runs
 
 ## Installation
 
@@ -160,7 +159,6 @@ n8n-workflow-cli/
 │   ├── types.ts            # TypeScript types
 │   └── commands/           # Command implementations
 │       ├── deploy.ts
-│       ├── execute.ts
 │       ├── list.ts
 │       ├── pull.ts
 │       └── validate.ts

@@ -62,10 +62,6 @@ export const WorkflowExecutionSchema = z.object({
   waitTill: z.string().nullable().optional(),
 });
 
-export const ExecutionResponseSchema = z.object({
-  data: WorkflowExecutionSchema,
-});
-
 // Config Schema
 export const ConfigSchema = z.object({
   N8N_API_URL: z.string().url(),
@@ -79,7 +75,6 @@ export type WorkflowConnection = z.infer<typeof WorkflowConnectionSchema>;
 export type Workflow = z.infer<typeof WorkflowSchema>;
 export type WorkflowListResponse = z.infer<typeof WorkflowListResponseSchema>;
 export type WorkflowExecution = z.infer<typeof WorkflowExecutionSchema>;
-export type ExecutionResponse = z.infer<typeof ExecutionResponseSchema>;
 export type Config = z.infer<typeof ConfigSchema>;
 
 // Workflow categories
@@ -99,12 +94,6 @@ export interface DeployOptions {
 export interface PullOptions {
   environment: string;
   category?: WorkflowCategory;
-}
-
-export interface ExecuteOptions {
-  environment: string;
-  workflow: string;
-  wait?: boolean;
 }
 
 export interface ListOptions {

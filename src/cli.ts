@@ -5,7 +5,6 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { deployCommand } from './commands/deploy.js';
-import { executeCommand } from './commands/execute.js';
 import { listCommand } from './commands/list.js';
 import { pullCommand } from './commands/pull.js';
 import { validateCommand } from './commands/validate.js';
@@ -40,7 +39,6 @@ program.hook('preAction', () => {
 });
 
 program.addCommand(deployCommand);
-program.addCommand(executeCommand);
 program.addCommand(listCommand);
 program.addCommand(pullCommand);
 program.addCommand(validateCommand);

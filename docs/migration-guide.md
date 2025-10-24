@@ -58,20 +58,6 @@ npm run deploy -- test --dry-run         # Preview changes
 npm run deploy -- production --parallel   # Faster deployment
 ```
 
-### Execute Workflow
-
-**Old (Bash):**
-```bash
-./scripts/legacy/execute-workflow.sh test create-tables
-./scripts/legacy/execute-workflow.sh production 123
-```
-
-**New (TypeScript):**
-```bash
-npm run execute -- create-tables test
-npm run execute -- 123 production
-```
-
 ### List Workflows
 
 **Old (Bash):**
@@ -107,7 +93,6 @@ npm run build  # Build once
 # Then use npx
 npx n8n-workflows pull test
 npx n8n-workflows deploy production --parallel
-npx n8n-workflows execute create-tables test
 npx n8n-workflows list --remote
 npx n8n-workflows validate
 ```
@@ -252,7 +237,6 @@ The legacy bash scripts are still available in `scripts/legacy/` if you need the
 ```bash
 ./scripts/legacy/pull-workflows.sh test
 ./scripts/legacy/deploy-workflows.sh production
-./scripts/legacy/execute-workflow.sh test workflow-name
 ./scripts/legacy/list-workflows.sh test
 ./scripts/legacy/validate-workflows.sh
 ```
