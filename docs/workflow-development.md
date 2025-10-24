@@ -2,6 +2,91 @@
 
 This guide provides best practices and guidelines for developing n8n workflows.
 
+## Quick Start
+
+> 📖 **New to this tool?** See the detailed [Quick Start Guide](QUICKSTART.md) for step-by-step instructions.
+
+1. **Create configuration** - Create `n8n.config.json` in your workflow repository:
+```json
+{
+  "workflowsDir": "./workflows",
+  "categories": ["business", "management", "shared"]
+}
+```
+
+2. **Set environment variables** - Configure your n8n credentials:
+
+The CLI uses two simple environment variables:
+- `N8N_API_URL` - Your n8n instance URL (must end with `/api/v1`)
+- `N8N_API_KEY` - Your n8n API key
+
+Switch environments by changing these variables as needed.
+
+**Option 1: Using .env file (recommended for local development)**
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Edit .env with your values
+N8N_API_URL=https://n8n.dev.company.com/api/v1
+N8N_API_KEY=your-dev-api-key
+```
+
+**Option 2: Using shell exports**
+```bash
+export N8N_API_URL="https://n8n.dev.company.com/api/v1"
+export N8N_API_KEY="your-dev-api-key"
+```
+
+### Categories Configuration
+
+Categories help organize workflows into folders in your repository:
+
+- **Define categories** in the `categories` array - customize for your project needs (e.g., `["api", "automation", "monitoring"]`)
+- **Commit the config** - The `n8n.config.json` file with your categories should be committed so the team shares the same organization
+- **Tag workflows in n8n** - Only workflows with tags matching a category name will be pulled
+- **Filter by category** - Use `--category` option to pull only specific category workflows
+
+Example: A workflow tagged with `business` in n8n will be saved to `workflows/business/` when pulled.
+
+3. **Pull workflows**:
+```bash
+# Pull all workflows with matching category tags
+n8n-workflow-cli pull
+
+# Pull only workflows tagged with "business"
+n8n-workflow-cli pull --category business
+```
+
+4. **Validate workflows**:
+```bash
+n8n-workflow-cli validate
+```
+
+5. **Deploy workflows**:
+```bash
+n8n-workflow-cli deploy workflows/business/my-workflow.json
+```
+
+## Workflow Project Template
+
+Use this template for workflow repositories:
+
+```json
+{
+  "name": "my-workflows",
+  "scripts": {
+    "validate": "n8n-workflow-cli validate",
+    "pull": "n8n-workflow-cli pull",
+    "deploy": "n8n-workflow-cli deploy",
+    "list": "n8n-workflow-cli list"
+  },
+  "devDependencies": {
+    "@integratingfactor/n8n-workflow-cli": "^1.1.2"
+  }
+}
+```
+
 ## Workflow Structure Best Practices
 
 ### Naming Conventions
