@@ -31,22 +31,16 @@ npm install --save-dev @integratingfactor/n8n-workflow-cli
 
 > 📖 **New to this tool?** See the detailed [Quick Start Guide](QUICKSTART.md) for step-by-step instructions.
 
-1. **Configure environments** - Copy the example config and customize it:
-```bash
-cp .n8n-cli.config.example.json .n8n-cli.config.json
-# Edit .n8n-cli.config.json with your n8n instance URLs and API keys
-```
-
-Example `.n8n-cli.config.json`:
+1. **Create configuration** - Create `n8n.config.json` in your workflow repository:
 ```json
 {
   "environments": {
     "dev": {
-      "baseUrl": "https://n8n.dev.company.com",
+      "baseUrl": "${N8N_DEV_URL}",
       "apiKey": "${N8N_DEV_API_KEY}"
     },
     "prod": {
-      "baseUrl": "https://n8n.prod.company.com",
+      "baseUrl": "${N8N_PROD_URL}",
       "apiKey": "${N8N_PROD_API_KEY}"
     }
   },
@@ -55,19 +49,28 @@ Example `.n8n-cli.config.json`:
 }
 ```
 
-> **Note:** The config file is gitignored to protect your API keys. Use environment variables like `${N8N_DEV_API_KEY}` for sensitive data.
+2. **Set environment variables** - Configure your n8n credentials:
+```bash
+export N8N_DEV_URL="https://n8n.dev.company.com"
+export N8N_DEV_API_KEY="your-dev-api-key"
+export N8N_PROD_URL="https://n8n.prod.company.com"
+export N8N_PROD_API_KEY="your-prod-api-key"
+```
+
+> **💡 Important:** The `n8n.config.json` file should be **committed to your repository**. It contains your project's categories and environment structure, but uses environment variables for secrets. This way, your workflow organization is version-controlled while API keys remain secure.
 
 ### Categories Configuration
 
 Categories help organize workflows into folders in your repository:
 
 - **Define categories** in the `categories` array - customize for your project needs (e.g., `["api", "automation", "monitoring"]`)
+- **Commit the config** - The `n8n.config.json` file with your categories should be committed so the team shares the same organization
 - **Tag workflows in n8n** - Only workflows with tags matching a category name will be pulled
 - **Filter by category** - Use `--category` option to pull only specific category workflows
 
 Example: A workflow tagged with `business` in n8n will be saved to `workflows/business/` when pulled.
 
-2. **Pull workflows** from an environment:
+3. **Pull workflows** from an environment:
 ```bash
 # Pull all workflows with matching category tags
 n8n-workflow-cli pull dev
@@ -76,12 +79,12 @@ n8n-workflow-cli pull dev
 n8n-workflow-cli pull dev --category business
 ```
 
-3. **Validate workflows**:
+4. **Validate workflows**:
 ```bash
 n8n-workflow-cli validate
 ```
 
-4. **Deploy workflows**:
+5. **Deploy workflows**:
 ```bash
 n8n-workflow-cli deploy prod workflows/business/my-workflow.json
 ```
@@ -145,10 +148,9 @@ node dist/cli.js --help
 
 4. **Test with a real n8n instance:**
 ```bash
-# Copy the example config
-cp .n8n-cli.config.example.json .n8n-cli.config.json
-
+# The repo already has n8n.config.json
 # Set your environment variables
+export N8N_DEV_URL="https://your-n8n-dev.com"
 export N8N_DEV_API_KEY="your-api-key-here"
 
 # Try pulling workflows

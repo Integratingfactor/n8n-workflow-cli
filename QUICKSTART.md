@@ -21,16 +21,20 @@ npm install -g @integratingfactor/n8n-workflow-cli
 mkdir -p my-n8n-workflows/workflows
 cd my-n8n-workflows
 
-# Create config file
-cat > .n8n-cli.config.json << 'EOF'
+# Initialize your repository
+git init
+npm init -y
+
+# Create n8n.config.json
+cat > n8n.config.json << 'EOF'
 {
   "environments": {
     "dev": {
-      "baseUrl": "https://your-n8n-dev.com",
+      "baseUrl": "${N8N_DEV_URL}",
       "apiKey": "${N8N_DEV_API_KEY}"
     },
     "prod": {
-      "baseUrl": "https://your-n8n-prod.com",
+      "baseUrl": "${N8N_PROD_URL}",
       "apiKey": "${N8N_PROD_API_KEY}"
     }
   },
@@ -40,11 +44,19 @@ cat > .n8n-cli.config.json << 'EOF'
 EOF
 
 # Set environment variables
+export N8N_DEV_URL="https://n8n.dev.company.com"
 export N8N_DEV_API_KEY="your-dev-api-key"
+export N8N_PROD_URL="https://n8n.prod.company.com"
 export N8N_PROD_API_KEY="your-prod-api-key"
+
+# Commit the config (it's safe - uses environment variables for secrets)
+git add n8n.config.json
+git commit -m "Add n8n configuration"
 ```
 
-> **Important:** Categories define which workflows are pulled and how they're organized:
+> **Important:** The `n8n.config.json` file should be **committed to your repository**. It contains your categories and environment structure, but uses environment variables for secrets. This way, your team shares the same workflow organization while API keys remain secure.
+
+> **Categories:** Categories define which workflows are pulled and how they're organized:
 > - Only workflows with tags matching a category (e.g., `business`, `management`, `shared`) will be pulled
 > - Workflows are saved to `workflows/<category>/` folders based on their tag
 > - Customize categories for your project (e.g., `["api", "automation", "monitoring"]`)
@@ -113,11 +125,9 @@ npm run dev -- deploy dev --dry-run
 
 ### 4. Test with your n8n instance
 ```bash
-# Create config (don't commit this!)
-cp .n8n-cli.config.example.json .n8n-cli.config.json
-
-# Edit the config with your URLs
-# Set environment variables for API keys
+# The repo already has n8n.config.json
+# Set environment variables for your n8n instance
+export N8N_DEV_URL="https://your-n8n-dev.com"
 export N8N_DEV_API_KEY="your-key-here"
 
 # Test pulling workflows (use npm run dev -- for all commands)
@@ -157,7 +167,7 @@ npm run dev -- list
 
 ```
 your-workflow-project/
-├── .n8n-cli.config.json    # Your config (gitignored)
+├── n8n.config.json         # Config with categories (committed to repo)
 ├── workflows/              # Your workflows
 │   ├── business/
 │   ├── management/
@@ -167,8 +177,9 @@ your-workflow-project/
 
 ## Tips
 
-- **Security**: Never commit `.n8n-cli.config.json` with real API keys
-- **Environment Variables**: Use `${VAR_NAME}` in config to reference env vars
+- **Security**: Keep API keys in environment variables, not in the config file
+- **Commit Config**: The `n8n.config.json` should be committed with your project
+- **Environment Variables**: Use `${VAR_NAME}` syntax in config to reference env vars
 - **Categories**: Organize workflows into categories for better management
 - **Dry Run**: Always test with `--dry-run` before deploying to production
 - **Validation**: Run `validate` before deploying to catch errors early
@@ -191,7 +202,7 @@ npm run deploy dev                 # ❌ Wrong
 ```
 
 ### "Configuration file not found"
-Create `.n8n-cli.config.json` in your project directory or current working directory.
+Create `n8n.config.json` in your project directory or current working directory.
 
 ### "Failed to connect to n8n API"
 - Check your `baseUrl` is correct (include https://)

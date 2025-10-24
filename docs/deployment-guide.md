@@ -200,21 +200,21 @@ jobs:
       
       - name: Deploy to production
         env:
-          N8N_API_URL: ${{ secrets.N8N_PROD_API_URL }}
-          N8N_API_KEY: ${{ secrets.N8N_PROD_API_KEY }}
+          N8N_PROD_URL: ${{ secrets.N8N_PROD_URL }}
+          N8N_PROD_API_KEY: ${{ secrets.N8N_PROD_API_KEY }}
         run: |
-          # Create temporary config
-          echo "N8N_API_URL=$N8N_API_URL" > config/prod.env
-          echo "N8N_API_KEY=$N8N_API_KEY" >> config/prod.env
-          echo "ENVIRONMENT=production" >> config/prod.env
+          # Install CLI
+          npm install -g @integratingfactor/n8n-workflow-cli
           
-          # Deploy
-          ./scripts/deploy-workflows.sh prod
+          # Deploy (n8n.config.json is in repo, uses environment variables)
+          n8n-workflow-cli deploy prod
 ```
 
 Add secrets in GitHub repository settings:
-- `N8N_PROD_API_URL`
-- `N8N_PROD_API_KEY`
+- `N8N_PROD_URL` - Your n8n production URL
+- `N8N_PROD_API_KEY` - Your n8n production API key
+
+The `n8n.config.json` in your repository references these environment variables.
 
 ### Option 2: Manual Approval Process
 

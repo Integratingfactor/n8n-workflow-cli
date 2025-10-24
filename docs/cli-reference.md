@@ -18,17 +18,17 @@ npm install
 
 ## Configuration
 
-Create a `.n8n-cli.config.json` file in your project root:
+Create a `n8n.config.json` file in your workflow repository root:
 
 ```json
 {
   "environments": {
     "dev": {
-      "baseUrl": "https://n8n.dev.company.com",
+      "baseUrl": "${N8N_DEV_URL}",
       "apiKey": "${N8N_DEV_API_KEY}"
     },
     "prod": {
-      "baseUrl": "https://n8n.prod.company.com",
+      "baseUrl": "${N8N_PROD_URL}",
       "apiKey": "${N8N_PROD_API_KEY}"
     }
   },
@@ -36,6 +36,17 @@ Create a `.n8n-cli.config.json` file in your project root:
   "categories": ["business", "management", "shared"]
 }
 ```
+
+Then set your environment variables:
+
+```bash
+export N8N_DEV_URL="https://n8n.dev.company.com"
+export N8N_DEV_API_KEY="your-dev-api-key"
+export N8N_PROD_URL="https://n8n.prod.company.com"
+export N8N_PROD_API_KEY="your-prod-api-key"
+```
+
+> **Important:** The `n8n.config.json` file should be **committed to your repository**. It contains your categories and environment structure, but uses environment variables for secrets. This ensures your workflow organization is version-controlled while keeping API keys secure.
 
 ### Categories
 
@@ -53,7 +64,7 @@ Categories organize workflows into folders and control which workflows are pulle
 ### `pull`
 Pull workflows from n8n instance to local files.
 
-**Important:** Only workflows with tags matching categories defined in `.n8n-cli.config.json` will be pulled. Workflows without matching category tags are skipped.
+**Important:** Only workflows with tags matching categories defined in `n8n.config.json` will be pulled. Workflows without matching category tags are skipped.
 
 **Usage:**
 ```bash
@@ -67,7 +78,7 @@ n8n-workflow-cli pull <environment> [options]
 - `--category <category>`: Filter to only pull workflows with this specific category tag (must be defined in config)
 
 **Category Behavior:**
-1. Categories must be defined in `.n8n-cli.config.json` (e.g., `"categories": ["business", "management", "shared"]`)
+1. Categories must be defined in `n8n.config.json` (e.g., `"categories": ["business", "management", "shared"]`)
 2. Only workflows with a tag exactly matching a category name will be pulled
 3. Workflows are saved to `workflows/<category>/` folders
 4. Use `--category` to narrow the pull to a specific category

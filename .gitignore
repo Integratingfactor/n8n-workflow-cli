@@ -1,8 +1,7 @@
 # .gitignore for n8n-workflow-cli
 
-# Configuration files (contain API keys and secrets)
-.n8n-cli.config.json
-!.n8n-cli.config.example.json
+# Configuration files - n8n.config.json should be committed per repo
+# (contains categories, uses environment variables for secrets)
 *.config.local.json
 
 # Environment variables

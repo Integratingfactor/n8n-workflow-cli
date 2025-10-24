@@ -27,9 +27,9 @@ program
 // Add helpful information about configuration
 program.hook('preAction', () => {
   // Check if config exists
-  const configPath = path.join(process.cwd(), '.n8n-cli.config.json');
+  const configPath = path.join(process.cwd(), 'n8n.config.json');
   if (!fs.existsSync(configPath)) {
-    console.log('ℹ️  Configuration file .n8n-cli.config.json not found in current directory.');
+    console.log('ℹ️  Configuration file n8n.config.json not found in current directory.');
     console.log('   Create one with your n8n environment settings to get started.');
     console.log(
       '   See documentation: https://github.com/integratingfactor/n8n-workflow-cli#configuration'
@@ -55,17 +55,21 @@ Examples:
   $ n8n-workflow-cli list --remote prod          # List workflows in prod environment
 
 Configuration:
-  Create .n8n-cli.config.json in your project root:
+  Create n8n.config.json in your project root:
   {
     "environments": {
       "dev": {
-        "baseUrl": "https://n8n.dev.company.com",
+        "baseUrl": "\${N8N_DEV_URL}",
         "apiKey": "\${N8N_DEV_API_KEY}"
       }
     },
     "workflowsDir": "./workflows",
     "categories": ["business", "management", "shared"]
   }
+  
+  Then set environment variables:
+  export N8N_DEV_URL="https://n8n.dev.company.com"
+  export N8N_DEV_API_KEY="your-api-key"
 
 For more information, visit: https://github.com/integratingfactor/n8n-workflow-cli
 `

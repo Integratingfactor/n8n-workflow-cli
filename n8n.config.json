@@ -1,15 +1,15 @@
 {
   "environments": {
     "dev": {
-      "baseUrl": "https://n8n.dev.example.com",
+      "baseUrl": "${N8N_DEV_URL}",
       "apiKey": "${N8N_DEV_API_KEY}"
     },
     "staging": {
-      "baseUrl": "https://n8n.staging.example.com",
+      "baseUrl": "${N8N_STAGING_URL}",
       "apiKey": "${N8N_STAGING_API_KEY}"
     },
     "prod": {
-      "baseUrl": "https://n8n.prod.example.com",
+      "baseUrl": "${N8N_PROD_URL}",
       "apiKey": "${N8N_PROD_API_KEY}"
     }
   },

@@ -19,9 +19,9 @@ export type EnvironmentConfig = z.infer<typeof EnvironmentConfigSchema>;
 export function loadConfig(): Config {
   // Look for config in current working directory first, then parent directories
   const configPaths = [
-    '.n8n-cli.config.json',
-    path.join(process.cwd(), '.n8n-cli.config.json'),
-    path.join(process.cwd(), '..', '.n8n-cli.config.json'),
+    'n8n.config.json',
+    path.join(process.cwd(), 'n8n.config.json'),
+    path.join(process.cwd(), '..', 'n8n.config.json'),
   ];
 
   for (const configPath of configPaths) {
@@ -43,7 +43,7 @@ export function loadConfig(): Config {
   }
 
   throw new Error(
-    'Configuration file .n8n-cli.config.json not found. Please create one in your project directory.'
+    'Configuration file n8n.config.json not found. Please create one in your project directory.'
   );
 }
 
@@ -52,7 +52,9 @@ function resolveEnvironmentVariables(obj: any): any {
     return obj.replace(/\$\{([^}]+)\}/g, (match, envVar) => {
       const value = process.env[envVar];
       if (!value) {
-        throw new Error(`Environment variable ${envVar} is not set`);
+        throw new Error(
+          `Environment variable ${envVar} is not set. Please set it before running the CLI:\n  export ${envVar}="your-value"`
+        );
       }
       return value;
     });
@@ -81,6 +83,19 @@ export function getEnvironmentConfig(environment: string): EnvironmentConfig {
     const availableEnvs = Object.keys(config.environments).join(', ');
     throw new Error(
       `Environment '${environment}' not found. Available environments: ${availableEnvs}`
+    );
+  }
+
+  // Validate that required values are set
+  if (!envConfig.baseUrl || envConfig.baseUrl.includes('${')) {
+    throw new Error(
+      `Invalid baseUrl for environment '${environment}'. Make sure environment variables are set correctly.`
+    );
+  }
+
+  if (!envConfig.apiKey || envConfig.apiKey.includes('${')) {
+    throw new Error(
+      `Invalid apiKey for environment '${environment}'. Make sure environment variables are set correctly.`
     );
   }
 
