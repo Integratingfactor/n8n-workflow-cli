@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.3] - 2025-10-24 - Critical fixes for personal spaces and deploy
+
+### Fixed
+- **CRITICAL**: Fixed deploy to work with n8n personal spaces
+  - Changed workflow lookup to always use name instead of ID
+  - Prevents 403 Forbidden errors when workflow IDs exist in other users' personal spaces
+  - Automatically corrects local workflow IDs if they differ from remote
+  - Simplified deploy logic by removing complex ID-based error handling
+- Fixed deploy command ignoring workflow argument
+  - Deploy now correctly deploys only the specified workflow file when provided
+  - Previously deployed all workflows regardless of the argument
+
 ## [1.1.2] - 2025-10-24 - Documentation and validation improvements
 
 ### Changed
