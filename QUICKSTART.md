@@ -7,9 +7,13 @@
 ## For Users (Installing from npm)
 
 ### 1. Install the CLI
+## Installation
+
 ```bash
-npm install -g @company/n8n-workflow-cli
+npm install -g @integratingfactor/n8n-workflow-cli
 ```
+
+## Prerequisites
 
 ### 2. Set up your project
 ```bash

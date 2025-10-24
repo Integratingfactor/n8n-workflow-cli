@@ -15,13 +15,17 @@ A powerful CLI tool for managing n8n workflows across multiple environments with
 ## Installation
 
 ### Global Installation
+## Installation
+
 ```bash
-npm install -g @company/n8n-workflow-cli
+npm install -g @integratingfactor/n8n-workflow-cli
 ```
+
+## Quick Start
 
 ### Project Installation
 ```bash
-npm install --save-dev @company/n8n-workflow-cli
+npm install --save-dev @integratingfactor/n8n-workflow-cli
 ```
 
 ## Quick Start
@@ -91,7 +95,7 @@ Use this template for workflow repositories:
     "list": "n8n-workflow-cli list"
   },
   "devDependencies": {
-    "@company/n8n-workflow-cli": "^1.0.0"
+    "@integratingfactor/n8n-workflow-cli": "^1.0.0"
   }
 }
 ```

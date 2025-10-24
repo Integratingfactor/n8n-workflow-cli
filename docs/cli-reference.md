@@ -6,7 +6,7 @@ Complete command reference for n8n-workflow-cli.
 
 **Global Installation (recommended for users):**
 ```bash
-npm install -g @company/n8n-workflow-cli
+npm install -g @integratingfactor/n8n-workflow-cli
 ```
 
 **Development Setup (for contributors):**
@@ -175,7 +175,7 @@ npm run dev -- <command> [options]
 ```yaml
 - name: Deploy workflows
   run: |
-    npm install -g @company/n8n-workflow-cli
+    npm install -g @integratingfactor/n8n-workflow-cli
     n8n-workflow-cli validate
     n8n-workflow-cli deploy prod --parallel
 ```
