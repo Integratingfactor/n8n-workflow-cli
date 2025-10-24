@@ -11,6 +11,7 @@ export async function pullCommandHandler(options: PullOptions): Promise<void> {
 
   try {
     const config = await configManager.loadConfig(options.environment);
+    const categories = configManager.getCategories();
     spinner.succeed(`Loaded configuration for ${chalk.cyan(options.environment)} environment`);
 
     spinner.start('Connecting to n8n API...');
@@ -37,14 +38,24 @@ export async function pullCommandHandler(options: PullOptions): Promise<void> {
         // Fetch full workflow data
         const fullWorkflow = await client.getWorkflow(workflow.id!);
 
-        // Determine category
-        const category = options.category || determineCategory(fullWorkflow);
+        // Determine category from workflow tags only (never use command option as default)
+        const category = determineCategory(fullWorkflow, categories);
 
         // Log tags for debugging
         const tags = fullWorkflow.tags?.map((t: any) => t.name).join(', ') || 'none';
+
+        // Skip workflows without a matching category tag
+        if (!category) {
+          workflowSpinner.info(
+            `Skipped: ${workflow.name} [tags: ${tags}] (no matching category tag)`
+          );
+          skippedCount++;
+          continue;
+        }
+
         workflowSpinner.text = `${workflow.name} [tags: ${tags}] → ${category}`;
 
-        // Skip if category doesn't match filter
+        // Skip if category doesn't match filter (when --category option is provided)
         if (options.category && category !== options.category) {
           workflowSpinner.info(`Skipped: ${workflow.name} (category: ${category})`);
           skippedCount++;

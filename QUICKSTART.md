@@ -18,7 +18,7 @@ npm install -g @integratingfactor/n8n-workflow-cli
 ### 2. Set up your project
 ```bash
 # Create a workflows directory
-mkdir -p my-n8n-workflows/workflows/{business,management,shared}
+mkdir -p my-n8n-workflows/workflows
 cd my-n8n-workflows
 
 # Create config file
@@ -44,12 +44,25 @@ export N8N_DEV_API_KEY="your-dev-api-key"
 export N8N_PROD_API_KEY="your-prod-api-key"
 ```
 
-### 3. Pull workflows from n8n
+> **Important:** Categories define which workflows are pulled and how they're organized:
+> - Only workflows with tags matching a category (e.g., `business`, `management`, `shared`) will be pulled
+> - Workflows are saved to `workflows/<category>/` folders based on their tag
+> - Customize categories for your project (e.g., `["api", "automation", "monitoring"]`)
+
+### 3. Tag your workflows in n8n
+
+Before pulling, ensure your workflows in n8n are tagged with category names (e.g., `business`, `management`, `shared`).
+
+### 4. Pull workflows from n8n
 ```bash
+# Pull all workflows with matching category tags
 n8n-workflow-cli pull dev
+
+# Pull only workflows tagged with "business"
+n8n-workflow-cli pull dev --category business
 ```
 
-### 4. Common commands
+### 5. Common commands
 ```bash
 # List all workflows
 n8n-workflow-cli list
@@ -68,9 +81,6 @@ n8n-workflow-cli deploy prod workflows/business/my-workflow.json
 
 # Dry run (test without changes)
 n8n-workflow-cli deploy prod --dry-run
-
-# Execute a workflow
-n8n-workflow-cli execute prod "My Workflow Name"
 ```
 
 ## For Contributors (Cloning the repo)
