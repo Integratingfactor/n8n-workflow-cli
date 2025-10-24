@@ -45,13 +45,8 @@ EOF
 
 **Option 2: Using shell exports**
 ```bash
-# For dev environment
 export N8N_API_URL="https://n8n.dev.company.com/api/v1"
 export N8N_API_KEY="your-dev-api-key"
-
-# For prod environment (change the values)
-export N8N_API_URL="https://n8n.prod.company.com/api/v1"
-export N8N_API_KEY="your-prod-api-key"
 ```
 
 > **Important:** The `n8n.config.json` file should be **committed to your repository**. It contains only workflow organization (categories, directory). All credentials are in environment variables. The `.env` file is gitignored for security.
@@ -123,19 +118,6 @@ n8n-workflow-cli deploy --dry-run
 n8n-workflow-cli deploy --parallel
 ```
 
-### List workflows
-```bash
-n8n-workflow-cli list
-n8n-workflow-cli list --remote
-```
-
-### Validate workflows
-```bash
-n8n-workflow-cli validate
-```
-
-## Command Details (continued)
-
 ### `list`
 List workflows locally or from n8n instance.
 
@@ -166,12 +148,6 @@ n8n-workflow-cli validate
 n8n-workflow-cli validate
 ```
 
-## Build for Production
-
-```bash
-npm run build
-```
-
 ## Development Mode
 
 Run without building:
@@ -181,20 +157,9 @@ npm run dev -- <command> [options]
 
 ## Environment Setup
 
-1. Set environment variables with your n8n details:
-   - `N8N_API_URL`: API endpoint
-   - `N8N_API_KEY`: API key from n8n Settings
-
-## Features
-
-✅ Type-safe API client  
-✅ Automatic workflow categorization  
-✅ Parallel deployments  
-✅ Dry-run mode  
-✅ Category filtering  
-✅ Comprehensive error handling  
-✅ Progress spinners and colors  
-✅ CI/CD ready  
+Set environment variables with your n8n details:
+- `N8N_API_URL`: API endpoint
+- `N8N_API_KEY`: API key from n8n Settings
 
 ## CI/CD Example
 
@@ -225,23 +190,4 @@ n8n-workflow-cli pull --help
 n8n-workflow-cli deploy --help
 n8n-workflow-cli list --help
 n8n-workflow-cli validate --help
-```
-
-## Troubleshooting
-
-**Build errors:**
-```bash
-npm run clean
-npm install
-npm run build
-```
-
-**Type checking only:**
-```bash
-npm run typecheck
-```
-
-**Missing dependencies:**
-```bash
-npm install
 ```
