@@ -16,15 +16,17 @@ export const WorkflowNodeSchema = z.object({
 });
 
 export const WorkflowConnectionSchema = z.object({
-  main: z.array(
-    z.array(
-      z.object({
-        node: z.string(),
-        type: z.string(),
-        index: z.number(),
-      })
+  main: z
+    .array(
+      z.array(
+        z.object({
+          node: z.string(),
+          type: z.string(),
+          index: z.number(),
+        })
+      )
     )
-  ).optional(),
+    .optional(),
 });
 
 export const WorkflowSchema = z.object({

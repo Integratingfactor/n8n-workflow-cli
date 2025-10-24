@@ -25,55 +25,56 @@ export class WorkflowManager {
   saveWorkflowToFile(workflow: any, category: string): void {
     const categoryDir = this.getCategoryDirectory(category);
     this.ensureDirectoryExists(categoryDir);
-    
+
     // Normalize null values to empty objects for validation
     const normalizedWorkflow = {
       ...workflow,
       staticData: workflow.staticData === null ? {} : workflow.staticData,
       meta: workflow.meta === null ? {} : workflow.meta,
     };
-    
+
     const filename = `${workflow.name.replace(/[^a-zA-Z0-9_-]/g, '_')}.json`;
     const filePath = path.join(categoryDir, filename);
-    
+
     fs.writeFileSync(filePath, JSON.stringify(normalizedWorkflow, null, 2));
     console.log(`✓ Saved workflow: ${workflow.name} -> ${path.relative(process.cwd(), filePath)}`);
   }
 
   loadWorkflowFromFile(filePath: string): any {
     const absolutePath = path.resolve(process.cwd(), filePath);
-    
+
     if (!fs.existsSync(absolutePath)) {
       throw new Error(`Workflow file not found: ${filePath}`);
     }
-    
+
     const content = fs.readFileSync(absolutePath, 'utf-8');
     return JSON.parse(content);
   }
 
   getWorkflowFiles(): string[] {
     const workflowsDir = this.getWorkflowsDirectory();
-    
+
     if (!fs.existsSync(workflowsDir)) {
       console.warn(`⚠ Workflows directory not found: ${workflowsDir}`);
-      console.warn(`  Run 'n8n-workflows pull <environment>' to create it and pull workflows.`);
+      console.warn(`  Run 'n8n-workflow-cli pull <environment>' to create it and pull workflows.`);
       return [];
     }
-    
+
     const files: string[] = [];
-    
+
     for (const category of this.config.categories) {
       const categoryDir = this.getCategoryDirectory(category);
-      
+
       if (fs.existsSync(categoryDir)) {
-        const categoryFiles = fs.readdirSync(categoryDir)
-          .filter(file => file.endsWith('.json'))
-          .map(file => path.join('workflows', category, file));
-        
+        const categoryFiles = fs
+          .readdirSync(categoryDir)
+          .filter((file) => file.endsWith('.json'))
+          .map((file) => path.join('workflows', category, file));
+
         files.push(...categoryFiles);
       }
     }
-    
+
     return files;
   }
 
@@ -88,36 +89,38 @@ export async function loadWorkflowFromFile(filePath: string): Promise<any> {
 
 export async function findWorkflowFiles(projectRoot: string, category?: string): Promise<string[]> {
   const workflowsDir = path.join(projectRoot, 'workflows');
-  
+
   if (!fs.existsSync(workflowsDir)) {
     return [];
   }
-  
+
   if (category) {
     const categoryDir = path.join(workflowsDir, category);
     if (!fs.existsSync(categoryDir)) {
       return [];
     }
-    
-    return fs.readdirSync(categoryDir)
-      .filter(file => file.endsWith('.json'))
-      .map(file => path.join(categoryDir, file));
+
+    return fs
+      .readdirSync(categoryDir)
+      .filter((file) => file.endsWith('.json'))
+      .map((file) => path.join(categoryDir, file));
   }
-  
+
   // Return all workflow files from all categories
   const files: string[] = [];
   const categories = ['business', 'management', 'shared'];
-  
+
   for (const cat of categories) {
     const categoryDir = path.join(workflowsDir, cat);
     if (fs.existsSync(categoryDir)) {
-      const categoryFiles = fs.readdirSync(categoryDir)
-        .filter(file => file.endsWith('.json'))
-        .map(file => path.join(categoryDir, file));
+      const categoryFiles = fs
+        .readdirSync(categoryDir)
+        .filter((file) => file.endsWith('.json'))
+        .map((file) => path.join(categoryDir, file));
       files.push(...categoryFiles);
     }
   }
-  
+
   return files;
 }
 
@@ -130,7 +133,7 @@ export async function validateAllWorkflows(projectRoot: string): Promise<{
     valid: [] as string[],
     invalid: [] as { file: string; errors: string[] }[],
   };
-  
+
   for (const file of files) {
     try {
       await loadWorkflowFromFile(file);
@@ -142,36 +145,57 @@ export async function validateAllWorkflows(projectRoot: string): Promise<{
       });
     }
   }
-  
+
   return results;
 }
 
 export function determineCategory(workflow: any): string {
-  // Simple categorization logic based on workflow name or tags
+  // First, check if workflow has tags that match category names
+  if (workflow.tags && Array.isArray(workflow.tags)) {
+    const tagNames = workflow.tags.map((tag: any) => tag.name.toLowerCase());
+
+    // Check for exact category matches in tags
+    if (tagNames.includes('management')) return 'management';
+    if (tagNames.includes('shared')) return 'shared';
+    if (tagNames.includes('business')) return 'business';
+
+    // Check for partial matches
+    for (const tagName of tagNames) {
+      if (tagName.includes('management') || tagName.includes('admin')) {
+        return 'management';
+      }
+      if (tagName.includes('shared') || tagName.includes('common')) {
+        return 'shared';
+      }
+    }
+  }
+
+  // Fallback to workflow name-based categorization
   const name = workflow.name?.toLowerCase() || '';
-  
+
   if (name.includes('management') || name.includes('admin')) {
     return 'management';
   }
-  
+
   if (name.includes('shared') || name.includes('common')) {
     return 'shared';
   }
-  
+
+  // Default to business category
   return 'business';
 }
 
 export function saveWorkflowToFile(workflow: any, category: string, projectRoot?: string): string {
   const workflowManager = new WorkflowManager();
   workflowManager.saveWorkflowToFile(workflow, category);
-  
+
   // Return the file path
   const config = loadConfig();
-  const workflowsDir = projectRoot ? 
-    path.join(projectRoot, config.workflowsDir) : 
-    path.resolve(process.cwd(), config.workflowsDir);
+  const workflowsDir = projectRoot
+    ? path.join(projectRoot, config.workflowsDir)
+    : path.resolve(process.cwd(), config.workflowsDir);
   const categoryDir = path.join(workflowsDir, category);
   const fileName = `${workflow.name.replace(/[^a-zA-Z0-9-_]/g, '_')}.json`;
-  
+
   return path.join(categoryDir, fileName);
 }

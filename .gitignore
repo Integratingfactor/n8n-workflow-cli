@@ -64,8 +64,7 @@ ehthumbs.db
 Desktop.ini
 
 # Test and local workflow files
-workflows/**/*.local.json
-workflows/**/*.test.json
+workflows/**
 
 # Coverage reports (if tests are added)
 coverage/
