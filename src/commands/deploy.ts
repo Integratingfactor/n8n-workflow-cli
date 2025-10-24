@@ -26,39 +26,85 @@ async function deployWorkflow(
     }
 
     if (workflow.id) {
-      // Update existing workflow
-      const updated = await client.updateWorkflow(workflow.id, workflow);
+      // Try to update existing workflow
+      try {
+        const updated = await client.updateWorkflow(workflow.id, workflow);
 
-      // Update workflow tags if they exist
-      if (workflow.tags && workflow.tags.length > 0) {
-        // Get all existing tags
-        const existingTags = await client.listTags();
+        // Update workflow tags if they exist
+        if (workflow.tags && workflow.tags.length > 0) {
+          // Get all existing tags
+          const existingTags = await client.listTags();
 
-        // Create a map of tag names to IDs
-        const tagNameToId = new Map(existingTags.map((tag) => [tag.name, tag.id]));
+          // Create a map of tag names to IDs
+          const tagNameToId = new Map(existingTags.map((tag) => [tag.name, tag.id]));
 
-        // Process each tag - create if it doesn't exist
-        const tagIds: string[] = [];
-        for (const tag of workflow.tags) {
-          const tagName = tag.name;
-          if (tagNameToId.has(tagName)) {
-            tagIds.push(tagNameToId.get(tagName)!);
-          } else {
-            const newTag = await client.createTag(tagName);
-            tagIds.push(newTag.id);
+          // Process each tag - create if it doesn't exist
+          const tagIds: string[] = [];
+          for (const tag of workflow.tags) {
+            const tagName = tag.name;
+            if (tagNameToId.has(tagName)) {
+              tagIds.push(tagNameToId.get(tagName)!);
+            } else {
+              const newTag = await client.createTag(tagName);
+              tagIds.push(newTag.id);
+            }
           }
+
+          // Assign all tags to the workflow
+          await client.updateWorkflowTags(workflow.id, tagIds);
         }
 
-        // Assign all tags to the workflow
-        await client.updateWorkflowTags(workflow.id, tagIds);
-      }
+        return {
+          success: true,
+          message: `Updated: ${relativePath} (ID: ${updated.id})`,
+        };
+      } catch (error: any) {
+        // If workflow was deleted from n8n (404), create it as new
+        if (error.statusCode === 404 || error.message?.includes('Not Found')) {
+          const oldId = workflow.id;
+          const wasActive = workflow.active === true;
+          const created = await client.createWorkflow(workflow);
 
-      return {
-        success: true,
-        message: `Updated: ${relativePath} (ID: ${updated.id})`,
-      };
+          // Update local file with new ID
+          workflow.id = created.id;
+          const fs = await import('fs/promises');
+          await fs.writeFile(filePath, JSON.stringify(workflow, null, 2) + '\n', 'utf-8');
+
+          // Update workflow tags if they exist
+          if (workflow.tags && workflow.tags.length > 0 && created.id) {
+            const existingTags = await client.listTags();
+            const tagNameToId = new Map(existingTags.map((tag) => [tag.name, tag.id]));
+
+            const tagIds: string[] = [];
+            for (const tag of workflow.tags) {
+              const tagName = tag.name;
+              if (tagNameToId.has(tagName)) {
+                tagIds.push(tagNameToId.get(tagName)!);
+              } else {
+                const newTag = await client.createTag(tagName);
+                tagIds.push(newTag.id);
+              }
+            }
+
+            await client.updateWorkflowTags(created.id, tagIds);
+          }
+
+          // Activate workflow if it was active before
+          if (wasActive && created.id) {
+            await client.activateWorkflow(created.id);
+          }
+
+          return {
+            success: true,
+            message: `Recreated: ${relativePath} (old ID: ${oldId}, new ID: ${created.id})${wasActive ? ' [activated]' : ''}`,
+          };
+        }
+        // Re-throw other errors
+        throw error;
+      }
     } else {
       // Create new workflow
+      const wasActive = workflow.active === true;
       const created = await client.createWorkflow(workflow);
 
       // Update local file with new ID
@@ -90,9 +136,14 @@ async function deployWorkflow(
         await client.updateWorkflowTags(created.id, tagIds);
       }
 
+      // Activate workflow if it was active before
+      if (wasActive && created.id) {
+        await client.activateWorkflow(created.id);
+      }
+
       return {
         success: true,
-        message: `Created: ${relativePath} (ID: ${created.id})`,
+        message: `Created: ${relativePath} (ID: ${created.id})${wasActive ? ' [activated]' : ''}`,
       };
     }
   } catch (error) {
