@@ -3,6 +3,57 @@ import path from 'path';
 import { z } from 'zod';
 import { loadConfig } from './config.js';
 
+/**
+ * Clean workflow data for storage in source control
+ * Removes read-only and runtime fields that shouldn't be versioned
+ * Based on n8n API spec: only keep fields needed for create/update operations
+ */
+export function cleanWorkflowForStorage(workflow: any): any {
+  // Fields to remove (read-only or runtime data):
+  // - createdAt, updatedAt: Timestamps managed by n8n (readOnly in API spec)
+  // - versionId: Internal version tracking
+  // - isArchived: Archive status managed by n8n
+  // - id: We keep this for updates (ignored on create, used on update)
+  // - active: We keep this but it's readOnly in API spec (managed via separate activation endpoint)
+  
+  const fieldsToRemove = [
+    'createdAt',
+    'updatedAt', 
+    'versionId',
+    'isArchived',
+  ];
+
+  const cleaned = { ...workflow };
+  fieldsToRemove.forEach((field) => delete cleaned[field]);
+
+  // Normalize null values to empty objects for consistency
+  if (cleaned.staticData === null || cleaned.staticData === undefined) {
+    cleaned.staticData = {};
+  }
+  if (cleaned.meta === null || cleaned.meta === undefined) {
+    cleaned.meta = {};
+  }
+  
+  // Clean up nodes: remove execution data and runtime fields that cause diffs
+  if (cleaned.nodes && Array.isArray(cleaned.nodes)) {
+    cleaned.nodes = cleaned.nodes.map((node: any) => {
+      const cleanNode = { ...node };
+      
+      // Remove execution results and runtime data that changes between runs
+      // These are not part of the workflow definition and cause unnecessary diffs
+      delete cleanNode.data; // Execution output data
+      delete cleanNode.issues; // Runtime validation issues
+      delete cleanNode.hints; // Runtime hints/warnings
+      delete cleanNode.webhookId; // Runtime webhook ID
+      delete cleanNode.retryOnFail; // Execution retry settings (usually empty)
+      
+      return cleanNode;
+    });
+  }
+
+  return cleaned;
+}
+
 // ...existing schema definitions...
 
 export class WorkflowManager {
@@ -26,29 +77,12 @@ export class WorkflowManager {
     const categoryDir = this.getCategoryDirectory(category);
     this.ensureDirectoryExists(categoryDir);
 
-    // Remove read-only fields that shouldn't be saved to source control
-    // These fields are managed by n8n and cause unnecessary diffs
-    const fieldsToRemove = [
-      'createdAt',
-      'updatedAt',
-      'versionId',
-      'isArchived', // Usually false, managed by n8n
-    ];
-
-    const cleanedWorkflow = { ...workflow };
-    fieldsToRemove.forEach((field) => delete cleanedWorkflow[field]);
-
-    // Normalize null values to empty objects for validation
-    const normalizedWorkflow = {
-      ...cleanedWorkflow,
-      staticData: cleanedWorkflow.staticData === null ? {} : cleanedWorkflow.staticData,
-      meta: cleanedWorkflow.meta === null ? {} : cleanedWorkflow.meta,
-    };
+    const cleanedWorkflow = cleanWorkflowForStorage(workflow);
 
     const filename = `${workflow.name.replace(/[^a-zA-Z0-9_-]/g, '_')}.json`;
     const filePath = path.join(categoryDir, filename);
 
-    fs.writeFileSync(filePath, JSON.stringify(normalizedWorkflow, null, 2) + '\n');
+    fs.writeFileSync(filePath, JSON.stringify(cleanedWorkflow, null, 2) + '\n');
     console.log(`✓ Saved workflow: ${workflow.name} -> ${path.relative(process.cwd(), filePath)}`);
   }
 

@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.4] - 2025-10-25 - Enhanced workflow cleaning for cleaner diffs
+
+### Changed
+- **Enhanced workflow data cleaning** to reduce unnecessary diffs in source control
+  - Centralized cleaning logic in `cleanWorkflowForStorage()` function
+  - Now removes execution data from nodes (`data`, `issues`, `hints`, `webhookId`, `retryOnFail`)
+  - Removes runtime fields that change between executions without workflow definition changes
+  - Based on n8n API specification to only keep fields needed for create/update operations
+  - Normalizes null values to empty objects for consistency
+  - Both `pull` and `deploy` commands now use the same cleaning function
+
+### Added
+- Documentation section in DEVELOPMENT.md explaining workflow data cleaning
+- References to n8n API spec for field requirements
+
 ## [1.1.3] - 2025-10-24 - Critical fixes for personal spaces and deploy
 
 ### Fixed

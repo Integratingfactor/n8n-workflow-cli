@@ -106,6 +106,65 @@ n8n-workflow-cli/
 └── n8n.config.json         # Test config file (gitignored locally)
 ```
 
+## Workflow Data Cleaning
+
+The CLI automatically cleans workflow JSON files to minimize unnecessary diffs in source control. This is implemented in `cleanWorkflowForStorage()` in `src/workflow-manager.ts`.
+
+### Fields Removed from Storage
+
+Based on the [n8n API specification](https://github.com/n8n-io/n8n/blob/master/packages/cli/src/public-api/v1/handlers/workflows/spec/schemas/workflow.yml):
+
+**Top-level fields removed:**
+- `createdAt` - Timestamp managed by n8n (readOnly)
+- `updatedAt` - Timestamp managed by n8n (readOnly)
+- `versionId` - Internal version tracking
+- `isArchived` - Archive status managed by n8n
+
+**Node-level fields removed:**
+- `data` - Execution output data (changes on every run)
+- `issues` - Runtime validation issues
+- `hints` - Runtime hints/warnings
+- `webhookId` - Runtime webhook ID (regenerated)
+- `retryOnFail` - Execution retry settings
+
+**Fields Preserved:**
+- `id` - Needed for update operations
+- `active` - Kept for reference (though managed via separate activation API)
+- `name`, `nodes`, `connections`, `settings` - Core workflow definition
+
+### Why This Matters
+
+Without cleaning, workflow files show diffs for:
+- Every execution (timestamps, execution data)
+- Runtime state changes (issues, hints)
+- Internal tracking (version IDs, webhook IDs)
+
+With cleaning, only meaningful workflow changes appear in Git diffs:
+- Node additions/removals/modifications
+- Connection changes
+- Settings updates
+- Name changes
+
+### Extending the Cleaning Logic
+
+If you find additional fields causing unnecessary diffs, add them to `cleanWorkflowForStorage()`:
+
+```typescript
+// In src/workflow-manager.ts
+export function cleanWorkflowForStorage(workflow: any): any {
+  const fieldsToRemove = [
+    'createdAt',
+    'updatedAt',
+    'versionId',
+    'isArchived',
+    'yourNewField', // Add here
+  ];
+  // ...
+}
+```
+
+Always verify against the [n8n API spec](https://github.com/n8n-io/n8n/tree/master/packages/cli/src/public-api/v1/handlers/workflows/spec) to ensure removed fields aren't required for create/update operations.
+
 ### Available Scripts
 
 - `npm run build` - Compile TypeScript to JavaScript
