@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.4] - 2025-10-26 - Enhanced workflow cleaning for cleaner diffs
+
+### Changed
+- **Improved workflow data cleaning** to reduce unnecessary diffs while preserving all workflow configuration
+  - Centralized cleaning logic in `cleanWorkflowForStorage()` function based on n8n API documentation
+  - Now removes only read-only/runtime fields:
+    - `createdAt`, `updatedAt`: Read-only timestamps (per API spec)
+    - `versionId`, `isArchived`: Internal tracking fields
+    - `pinData`, `triggerCount`: Test/debug data not in API spec
+  - **Preserves all workflow configuration** including:
+    - `staticData`: Part of workflow definition (per API docs)
+    - `settings`: Complete workflow settings
+    - `shared`: Sharing/project metadata (cleaned to remove user timestamps)
+    - Node configuration: `webhookId`, `disabled`, `retryOnFail`, `executeOnce`, etc.
+  - Cleans `shared` field to remove frequently changing user metadata while keeping role/project structure
+  - Only removes execution results from nodes (`data`, `issues`, `hints`)
+  - Both `pull` and `deploy` commands now use the same cleaning function
+
+### Fixed
+- Fixed webhook triggers not registering after deploy by preserving `webhookId` and other node configuration
+
+### Added
+- Documentation section in DEVELOPMENT.md explaining workflow data cleaning
+- References to n8n API spec for field requirements
+
 ## [1.1.3] - 2025-10-24 - Critical fixes for personal spaces and deploy
 
 ### Fixed

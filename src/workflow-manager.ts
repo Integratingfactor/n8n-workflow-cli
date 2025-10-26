@@ -3,6 +3,74 @@ import path from 'path';
 import { z } from 'zod';
 import { loadConfig } from './config.js';
 
+/**
+ * Clean workflow data for storage in source control
+ * Removes read-only and frequently changing runtime fields
+ * Based on n8n API spec and documentation examples
+ */
+export function cleanWorkflowForStorage(workflow: any): any {
+  // Fields to remove (read-only fields per API spec with readOnly: true):
+  // - createdAt, updatedAt: Timestamps managed by n8n (readOnly in API spec)
+  // - versionId: Internal version tracking (not in API spec)
+  // - isArchived: Archive status managed by n8n (not in API spec)
+  // 
+  // Fields to KEEP (even though they may change):
+  // - id: Required for updates
+  // - active: Part of workflow state (readOnly but indicates desired state)
+  // - staticData: Part of workflow definition (per API docs example)
+  // - settings: Complete workflow settings
+  // - shared: Sharing/project metadata (per API docs example)
+  // - nodes with all properties: webhookId, disabled, notesInFlow, executeOnce, 
+  //   alwaysOutputData, retryOnFail, maxTries, waitBetweenTries, onError, etc.
+  
+  const fieldsToRemove = [
+    'createdAt',    // readOnly timestamp
+    'updatedAt',    // readOnly timestamp  
+    'versionId',    // Internal version tracking
+    'isArchived',   // Archive status
+    'pinData',      // Test/debug data (not in API example)
+    'triggerCount', // Runtime counter (not in API example)
+  ];
+
+  const cleaned = { ...workflow };
+  fieldsToRemove.forEach((field) => delete cleaned[field]);
+
+  // Clean up nodes: only remove execution results, keep all configuration
+  if (cleaned.nodes && Array.isArray(cleaned.nodes)) {
+    cleaned.nodes = cleaned.nodes.map((node: any) => {
+      const cleanNode = { ...node };
+      
+      // Only remove execution results and runtime validation issues
+      // Keep all node configuration fields (webhookId, disabled, retryOnFail, etc.)
+      delete cleanNode.data;   // Execution output data
+      delete cleanNode.issues; // Runtime validation issues  
+      delete cleanNode.hints;  // Runtime hints/warnings
+      
+      return cleanNode;
+    });
+  }
+
+  // Normalize shared field - clean up frequently changing user metadata
+  // Keep the structure but remove user details with timestamps
+  if (cleaned.shared && Array.isArray(cleaned.shared)) {
+    cleaned.shared = cleaned.shared.map((share: any) => {
+      const cleanShare: any = {
+        role: share.role,
+        workflowId: share.workflowId,
+        projectId: share.projectId,
+      };
+      // Keep project name if present
+      if (share.project && share.project.name) {
+        cleanShare.project = { name: share.project.name };
+      }
+      // Remove user object with frequently changing timestamps
+      return cleanShare;
+    });
+  }
+
+  return cleaned;
+}
+
 // ...existing schema definitions...
 
 export class WorkflowManager {
@@ -26,29 +94,12 @@ export class WorkflowManager {
     const categoryDir = this.getCategoryDirectory(category);
     this.ensureDirectoryExists(categoryDir);
 
-    // Remove read-only fields that shouldn't be saved to source control
-    // These fields are managed by n8n and cause unnecessary diffs
-    const fieldsToRemove = [
-      'createdAt',
-      'updatedAt',
-      'versionId',
-      'isArchived', // Usually false, managed by n8n
-    ];
-
-    const cleanedWorkflow = { ...workflow };
-    fieldsToRemove.forEach((field) => delete cleanedWorkflow[field]);
-
-    // Normalize null values to empty objects for validation
-    const normalizedWorkflow = {
-      ...cleanedWorkflow,
-      staticData: cleanedWorkflow.staticData === null ? {} : cleanedWorkflow.staticData,
-      meta: cleanedWorkflow.meta === null ? {} : cleanedWorkflow.meta,
-    };
+    const cleanedWorkflow = cleanWorkflowForStorage(workflow);
 
     const filename = `${workflow.name.replace(/[^a-zA-Z0-9_-]/g, '_')}.json`;
     const filePath = path.join(categoryDir, filename);
 
-    fs.writeFileSync(filePath, JSON.stringify(normalizedWorkflow, null, 2) + '\n');
+    fs.writeFileSync(filePath, JSON.stringify(cleanedWorkflow, null, 2) + '\n');
     console.log(`✓ Saved workflow: ${workflow.name} -> ${path.relative(process.cwd(), filePath)}`);
   }
 

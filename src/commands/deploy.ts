@@ -5,18 +5,16 @@ import path from 'path';
 import fs from 'fs';
 import { N8nClient } from '../api-client.js';
 import { configManager } from '../config.js';
-import { loadWorkflowFromFile, findWorkflowFiles } from '../workflow-manager.js';
+import { loadWorkflowFromFile, findWorkflowFiles, cleanWorkflowForStorage } from '../workflow-manager.js';
 import { DeployOptions } from '../types.js';
 
 /**
  * Remove read-only fields from workflow before saving to file
  * These fields are managed by n8n and cause unnecessary diffs in source control
+ * @deprecated Use cleanWorkflowForStorage from workflow-manager instead
  */
 function cleanWorkflowForSaving(workflow: any): any {
-  const fieldsToRemove = ['createdAt', 'updatedAt', 'versionId', 'isArchived'];
-  const cleaned = { ...workflow };
-  fieldsToRemove.forEach((field) => delete cleaned[field]);
-  return cleaned;
+  return cleanWorkflowForStorage(workflow);
 }
 
 async function deployWorkflow(
