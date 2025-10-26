@@ -112,42 +112,60 @@ The CLI automatically cleans workflow JSON files to minimize unnecessary diffs i
 
 ### Fields Removed from Storage
 
-Based on the [n8n API specification](https://github.com/n8n-io/n8n/blob/master/packages/cli/src/public-api/v1/handlers/workflows/spec/schemas/workflow.yml):
+Based on the [n8n API specification](https://github.com/n8n-io/n8n/blob/master/packages/cli/src/public-api/v1/handlers/workflows/spec/schemas/workflow.yml) and [API documentation examples](https://github.com/n8n-io/n8n/tree/master/packages/cli/src/public-api/v1/handlers/workflows):
 
 **Top-level fields removed:**
-- `createdAt` - Timestamp managed by n8n (readOnly)
-- `updatedAt` - Timestamp managed by n8n (readOnly)
-- `versionId` - Internal version tracking
-- `isArchived` - Archive status managed by n8n
+- `createdAt` - Timestamp managed by n8n (readOnly in API spec)
+- `updatedAt` - Timestamp managed by n8n (readOnly in API spec)
+- `versionId` - Internal version tracking (not in API spec)
+- `isArchived` - Archive status (not in API spec)
+- `pinData` - Test/debug pinned data (not in API spec)
+- `triggerCount` - Runtime execution counter (not in API spec)
+
+**Shared field cleaning:**
+- Removes `user` object with frequently changing timestamps (`updatedAt`, `lastActiveAt`)
+- Keeps `role`, `workflowId`, `projectId`, and `project.name`
 
 **Node-level fields removed:**
 - `data` - Execution output data (changes on every run)
 - `issues` - Runtime validation issues
 - `hints` - Runtime hints/warnings
-- `webhookId` - Runtime webhook ID (regenerated)
-- `retryOnFail` - Execution retry settings
 
-**Fields Preserved:**
-- `id` - Needed for update operations
-- `active` - Kept for reference (though managed via separate activation API)
-- `name`, `nodes`, `connections`, `settings` - Core workflow definition
+**Fields Preserved (critical for workflow functionality):**
+- `id` - Required for update operations
+- `active` - Workflow activation state
+- `staticData` - Part of workflow definition (per API docs)
+- `settings` - Complete workflow settings
+- `shared` - Sharing/project metadata (cleaned of user timestamps)
+- `name`, `nodes`, `connections` - Core workflow definition
+- **All node configuration**: `webhookId`, `disabled`, `notesInFlow`, `executeOnce`, `alwaysOutputData`, `retryOnFail`, `maxTries`, `waitBetweenTries`, `onError`, etc.
 
 ### Why This Matters
 
 Without cleaning, workflow files show diffs for:
-- Every execution (timestamps, execution data)
-- Runtime state changes (issues, hints)
-- Internal tracking (version IDs, webhook IDs)
+- Every execution (timestamps in `updatedAt`, `lastActiveAt`)
+- Runtime state changes (issues, hints, execution data)
+- User activity timestamps in `shared` object
 
 With cleaning, only meaningful workflow changes appear in Git diffs:
 - Node additions/removals/modifications
 - Connection changes
 - Settings updates
+- Configuration changes (webhooks, retry settings, etc.)
 - Name changes
+
+**Important**: The cleaning is conservative - we only remove fields that are:
+1. Explicitly marked as `readOnly` in the API spec
+2. Not present in n8n's API documentation examples
+3. Execution results that change on every run
 
 ### Extending the Cleaning Logic
 
-If you find additional fields causing unnecessary diffs, add them to `cleanWorkflowForStorage()`:
+If you find additional fields causing unnecessary diffs, verify they're not needed for workflow functionality:
+
+1. Check the [n8n API spec](https://github.com/n8n-io/n8n/tree/master/packages/cli/src/public-api/v1/handlers/workflows/spec)
+2. Test deploy/execution after removing
+3. Add to `cleanWorkflowForStorage()` if safe:
 
 ```typescript
 // In src/workflow-manager.ts
@@ -157,13 +175,15 @@ export function cleanWorkflowForStorage(workflow: any): any {
     'updatedAt',
     'versionId',
     'isArchived',
-    'yourNewField', // Add here
+    'pinData',
+    'triggerCount',
+    'yourNewField', // Add here after verification
   ];
   // ...
 }
 ```
 
-Always verify against the [n8n API spec](https://github.com/n8n-io/n8n/tree/master/packages/cli/src/public-api/v1/handlers/workflows/spec) to ensure removed fields aren't required for create/update operations.
+**Warning**: Removing too many fields can break workflow functionality (e.g., removing `webhookId` breaks webhook triggers, removing `staticData` loses workflow state).
 
 ### Available Scripts
 

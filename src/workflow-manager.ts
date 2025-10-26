@@ -5,49 +5,66 @@ import { loadConfig } from './config.js';
 
 /**
  * Clean workflow data for storage in source control
- * Removes read-only and runtime fields that shouldn't be versioned
- * Based on n8n API spec: only keep fields needed for create/update operations
+ * Removes read-only and frequently changing runtime fields
+ * Based on n8n API spec and documentation examples
  */
 export function cleanWorkflowForStorage(workflow: any): any {
-  // Fields to remove (read-only or runtime data):
+  // Fields to remove (read-only fields per API spec with readOnly: true):
   // - createdAt, updatedAt: Timestamps managed by n8n (readOnly in API spec)
-  // - versionId: Internal version tracking
-  // - isArchived: Archive status managed by n8n
-  // - id: We keep this for updates (ignored on create, used on update)
-  // - active: We keep this but it's readOnly in API spec (managed via separate activation endpoint)
+  // - versionId: Internal version tracking (not in API spec)
+  // - isArchived: Archive status managed by n8n (not in API spec)
+  // 
+  // Fields to KEEP (even though they may change):
+  // - id: Required for updates
+  // - active: Part of workflow state (readOnly but indicates desired state)
+  // - staticData: Part of workflow definition (per API docs example)
+  // - settings: Complete workflow settings
+  // - shared: Sharing/project metadata (per API docs example)
+  // - nodes with all properties: webhookId, disabled, notesInFlow, executeOnce, 
+  //   alwaysOutputData, retryOnFail, maxTries, waitBetweenTries, onError, etc.
   
   const fieldsToRemove = [
-    'createdAt',
-    'updatedAt', 
-    'versionId',
-    'isArchived',
+    'createdAt',    // readOnly timestamp
+    'updatedAt',    // readOnly timestamp  
+    'versionId',    // Internal version tracking
+    'isArchived',   // Archive status
+    'pinData',      // Test/debug data (not in API example)
+    'triggerCount', // Runtime counter (not in API example)
   ];
 
   const cleaned = { ...workflow };
   fieldsToRemove.forEach((field) => delete cleaned[field]);
 
-  // Normalize null values to empty objects for consistency
-  if (cleaned.staticData === null || cleaned.staticData === undefined) {
-    cleaned.staticData = {};
-  }
-  if (cleaned.meta === null || cleaned.meta === undefined) {
-    cleaned.meta = {};
-  }
-  
-  // Clean up nodes: remove execution data and runtime fields that cause diffs
+  // Clean up nodes: only remove execution results, keep all configuration
   if (cleaned.nodes && Array.isArray(cleaned.nodes)) {
     cleaned.nodes = cleaned.nodes.map((node: any) => {
       const cleanNode = { ...node };
       
-      // Remove execution results and runtime data that changes between runs
-      // These are not part of the workflow definition and cause unnecessary diffs
-      delete cleanNode.data; // Execution output data
-      delete cleanNode.issues; // Runtime validation issues
-      delete cleanNode.hints; // Runtime hints/warnings
-      delete cleanNode.webhookId; // Runtime webhook ID
-      delete cleanNode.retryOnFail; // Execution retry settings (usually empty)
+      // Only remove execution results and runtime validation issues
+      // Keep all node configuration fields (webhookId, disabled, retryOnFail, etc.)
+      delete cleanNode.data;   // Execution output data
+      delete cleanNode.issues; // Runtime validation issues  
+      delete cleanNode.hints;  // Runtime hints/warnings
       
       return cleanNode;
+    });
+  }
+
+  // Normalize shared field - clean up frequently changing user metadata
+  // Keep the structure but remove user details with timestamps
+  if (cleaned.shared && Array.isArray(cleaned.shared)) {
+    cleaned.shared = cleaned.shared.map((share: any) => {
+      const cleanShare: any = {
+        role: share.role,
+        workflowId: share.workflowId,
+        projectId: share.projectId,
+      };
+      // Keep project name if present
+      if (share.project && share.project.name) {
+        cleanShare.project = { name: share.project.name };
+      }
+      // Remove user object with frequently changing timestamps
+      return cleanShare;
     });
   }
 
