@@ -2,7 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.2.0] - 2025-10-26 - Multi-environment architecture with intelligent ID management
+## [1.2.0] - 2025-10-26 - Multi-environment architecture and diff command
+
+### Added
+- **`diff` command**: Compare local workflows with remote n8n instance
+  - Shows which workflows are modified, local-only, remote-only, or identical
+  - Can compare all workflows or filter by category/specific workflow
+  - Displays detailed differences including nodes, settings, tags
+  - Uses same cleaning logic as pull/deploy to avoid false positives from environment-specific fields
+  - Helps identify what needs to be deployed or pulled
 
 ### Changed
 - **BREAKING**: Complete architectural redesign for true multi-environment deployment
@@ -24,7 +32,6 @@ All notable changes to this project will be documented in this file.
   - **Credential ID merging**: Matches credentials by name (user must configure in each environment)
   - **Webhook ID preservation**: Automatically merged from existing workflow
 
-### Added
 - `mergeIdsFromExisting()`: Intelligent function to merge environment-specific IDs
 - `mergeCredentialIds()`: Credential ID matching by name across environments
 
