@@ -35,49 +35,22 @@ The CLI uses two simple environment variables:
 
 Switch environments by changing these variables as needed.
 
-**Option 1: Using .env file (recommended for local development)**
-```bash
-# Copy the example file
-cp .env.example .env
-
-# Edit .env with your values
-N8N_API_URL=https://n8n.dev.company.com/api/v1
-N8N_API_KEY=your-dev-api-key
-```
-
-**Option 2: Using shell exports**
-```bash
-export N8N_API_URL="https://n8n.dev.company.com/api/v1"
-export N8N_API_KEY="your-dev-api-key"
-```
-
-### Categories Configuration
-
-Categories help organize workflows into folders in your repository:
-
-- **Define categories** in the `categories` array - customize for your project needs (e.g., `["api", "automation", "monitoring"]`)
-- **Commit the config** - The `n8n.config.json` file with your categories should be committed so the team shares the same organization
-- **Tag workflows in n8n** - Only workflows with tags matching a category name will be pulled
-- **Filter by category** - Use `--category` option to pull only specific category workflows
-
-Example: A workflow tagged with `business` in n8n will be saved to `workflows/business/` when pulled.
-
-3. **Pull workflows**:
-```bash
-# Pull all workflows with matching category tags
-n8n-workflow-cli pull
-
-# Pull only workflows tagged with "business"
-n8n-workflow-cli pull --category business
-```
-
-4. **Compare changes**:
+3. **Compare changes**:
 ```bash
 # See what's different between local and remote (like sfdx force:source:status)
 n8n-workflow-cli diff
 
 # Compare specific category
 n8n-workflow-cli diff business
+```
+
+4. **Pull workflows**:
+```bash
+# Pull all workflows with matching category tags
+n8n-workflow-cli pull
+
+# Pull only workflows tagged with "business"
+n8n-workflow-cli pull --category business
 ```
 
 5. **Validate workflows**:
@@ -101,37 +74,37 @@ n8n-workflow-cli deploy
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  1. BUILD IN N8N INSTANCE (like working in scratch org)     │
-│     - Visual workflow editor                                 │
-│     - Test with real data                                    │
-│     - Iterate quickly                                        │
+│     - Visual workflow editor                                │
+│     - Test with real data                                   │
+│     - Iterate quickly                                       │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
 │  2. PULL TO SOURCE (like sfdx force:source:pull)            │
-│     - n8n-workflow-cli pull                                  │
-│     - Environment-specific IDs removed                       │
-│     - Clean workflow definitions saved                       │
+│     - n8n-workflow-cli pull                                 │
+│     - Environment-specific IDs removed                      │
+│     - Clean workflow definitions saved                      │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  3. VERSION CONTROL (standard Git workflow)                  │
-│     - git add workflows/                                     │
-│     - git commit -m "Add customer registration workflow"     │
-│     - git push origin feature/customer-registration          │
+│  3. VERSION CONTROL (standard Git workflow)                 │
+│     - git add workflows/                                    │
+│     - git commit -m "Add customer registration workflow"    │
+│     - git push origin feature/customer-registration         │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  4. COMPARE & VALIDATE (before deployment)                   │
-│     - n8n-workflow-cli diff                                  │
-│     - n8n-workflow-cli validate                              │
-│     - Review changes in PR                                   │
+│  4. COMPARE & VALIDATE (before deployment)                  │
+│     - n8n-workflow-cli diff                                 │
+│     - n8n-workflow-cli validate                             │
+│     - Review changes in PR                                  │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  5. DEPLOY TO ENVIRONMENTS (like sfdx force:source:deploy)   │
-│     - Switch environment (change N8N_API_URL)                │
-│     - n8n-workflow-cli deploy                                │
-│     - Verify and activate in target environment              │
+│  5. DEPLOY TO ENVIRONMENTS (like sfdx force:source:deploy)  │
+│     - Switch environment (change N8N_API_URL)               │
+│     - n8n-workflow-cli deploy                               │
+│     - Verify and activate in target environment             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
