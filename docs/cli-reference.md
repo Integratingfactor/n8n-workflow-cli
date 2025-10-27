@@ -95,6 +95,42 @@ n8n-workflow-cli pull --category business
 n8n-workflow-cli pull --category management
 ```
 
+### `diff`
+Compare local workflows with remote n8n instance to identify differences.
+
+**Usage:**
+```bash
+n8n-workflow-cli diff [workflow]
+```
+
+**Arguments:**
+- `workflow`: (Optional) Specific workflow file path or category name to compare. Omit to compare all workflows.
+
+**Output Categories:**
+- **Modified**: Workflows that differ between local and remote versions
+  - Shows specific differences: nodes, settings, tags, active status
+- **Local Only**: Workflows present locally but not found in n8n
+- **Remote Only**: Workflows present in n8n but not in local repository (with matching category tags)
+- **Identical**: Workflows that match exactly between local and remote
+
+**Examples:**
+```bash
+# Compare all workflows
+n8n-workflow-cli diff
+
+# Compare specific workflow file
+n8n-workflow-cli diff workflows/business/my-workflow.json
+
+# Compare all workflows in a category
+n8n-workflow-cli diff business
+```
+
+**Use Cases:**
+- Check what changes need to be deployed before running `deploy`
+- Identify workflows that should be pulled from remote
+- Verify that deployed workflows match local definitions
+- Review differences before switching environments
+
 ### `deploy`
 Deploy workflows from local files to n8n instance.
 

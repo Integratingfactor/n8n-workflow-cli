@@ -2,7 +2,52 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.4] - 2025-10-26 - Enhanced workflow cleaning for cleaner diffs
+## [1.2.0] - 2025-10-26 - Multi-environment architecture and diff command
+
+### Added
+- **`diff` command**: Compare local workflows with remote n8n instance
+  - Shows which workflows are modified, local-only, remote-only, or identical
+  - Can compare all workflows or filter by category/specific workflow
+  - Displays detailed differences including nodes, settings, tags
+  - Uses same cleaning logic as pull/deploy to avoid false positives from environment-specific fields
+  - Helps identify what needs to be deployed or pulled
+
+### Changed
+- **BREAKING**: Complete architectural redesign for true multi-environment deployment
+  - **IDs removed from source control**: Workflow, node, webhook, and credential IDs are no longer stored
+  - **Intelligent ID merging**: On deploy, IDs are dynamically merged from existing workflows or generated for new ones
+  - **Environment-agnostic source**: Same workflow source can deploy to dev, staging, prod with environment-specific IDs
+  
+- **Enhanced workflow cleaning** (`cleanWorkflowForStorage()`):
+  - Removes ALL environment-specific IDs: workflow ID, node IDs, webhook IDs, credential IDs
+  - Removes runtime state: `staticData`, `active`, `shared`, `pinData`, `triggerCount`
+  - Removes read-only fields: `createdAt`, `updatedAt`, `versionId`, `isArchived`
+  - Keeps credential names (without IDs) for reference
+  - Keeps all node configuration: positions, parameters, connections, settings
+
+- **Improved deploy logic**:
+  - **Update workflow**: Fetches existing workflow, merges IDs by name matching, then updates
+  - **Create workflow**: Creates without IDs (n8n generates), always inactive for safety
+  - **Node ID merging**: Matches nodes by name to preserve environment-specific IDs
+  - **Credential ID merging**: Matches credentials by name (user must configure in each environment)
+  - **Webhook ID preservation**: Automatically merged from existing workflow
+
+- `mergeIdsFromExisting()`: Intelligent function to merge environment-specific IDs
+- `mergeCredentialIds()`: Credential ID matching by name across environments
+
+### Benefits
+- ✅ Deploy same workflow to multiple environments (dev/staging/prod)
+- ✅ No ID conflicts between environments
+- ✅ Cleaner source control (no environment-specific data)
+- ✅ Webhooks work correctly in each environment
+- ✅ Clear separation: source = definition, environment = runtime IDs
+
+### Migration Notes
+- Existing workflow files with IDs will be cleaned on next `pull`
+- First deploy after upgrade will update workflows (IDs will be merged from n8n)
+- Credentials must be configured per environment (names preserved, IDs are environment-specific)
+
+## [1.1.4] - 2025-10-26 - Enhanced workflow cleaning for cleaner diffs (deprecated by 1.2.0)
 
 ### Changed
 - **Improved workflow data cleaning** to reduce unnecessary diffs while preserving all workflow configuration

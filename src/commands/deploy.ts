@@ -5,16 +5,68 @@ import path from 'path';
 import fs from 'fs';
 import { N8nClient } from '../api-client.js';
 import { configManager } from '../config.js';
-import { loadWorkflowFromFile, findWorkflowFiles, cleanWorkflowForStorage } from '../workflow-manager.js';
+import { loadWorkflowFromFile, findWorkflowFiles } from '../workflow-manager.js';
 import { DeployOptions } from '../types.js';
 
 /**
- * Remove read-only fields from workflow before saving to file
- * These fields are managed by n8n and cause unnecessary diffs in source control
- * @deprecated Use cleanWorkflowForStorage from workflow-manager instead
+ * Merge IDs from existing workflow into source workflow
+ * This allows deploying same source to different environments with environment-specific IDs
  */
-function cleanWorkflowForSaving(workflow: any): any {
-  return cleanWorkflowForStorage(workflow);
+function mergeIdsFromExisting(sourceWorkflow: any, existingWorkflow: any): any {
+  const merged = { ...sourceWorkflow };
+  
+  // Merge workflow ID
+  merged.id = existingWorkflow.id;
+  
+  // Merge node IDs by matching node names
+  if (merged.nodes && existingWorkflow.nodes) {
+    const existingNodeMap = new Map(existingWorkflow.nodes.map((n: any) => [n.name, n]));
+    
+    merged.nodes = merged.nodes.map((sourceNode: any) => {
+      const existingNode: any = existingNodeMap.get(sourceNode.name);
+      if (existingNode) {
+        return {
+          ...sourceNode,
+          id: existingNode.id,
+          // Merge webhookId if exists
+          ...(existingNode.webhookId && { webhookId: existingNode.webhookId }),
+          // Merge credential IDs by name
+          credentials: sourceNode.credentials ? mergeCredentialIds(sourceNode.credentials, existingNode.credentials) : sourceNode.credentials,
+        };
+      }
+      return sourceNode; // New node, no ID to merge
+    });
+  }
+  
+  return merged;
+}
+
+/**
+ * Merge credential IDs from existing node into source node credentials
+ */
+function mergeCredentialIds(sourceCredentials: any, existingCredentials: any): any {
+  if (!sourceCredentials || !existingCredentials) {
+    return sourceCredentials;
+  }
+  
+  const merged: any = {};
+  Object.keys(sourceCredentials).forEach(credKey => {
+    const sourceCred = sourceCredentials[credKey];
+    const existingCred = existingCredentials[credKey];
+    
+    if (sourceCred && existingCred && sourceCred.name === existingCred.name) {
+      // Same credential name - use existing ID
+      merged[credKey] = {
+        id: existingCred.id,
+        name: existingCred.name,
+      };
+    } else {
+      // Different credential or new - keep source (will need manual setup)
+      merged[credKey] = sourceCred;
+    }
+  });
+  
+  return merged;
 }
 
 async function deployWorkflow(
@@ -24,7 +76,7 @@ async function deployWorkflow(
   dryRun: boolean
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const workflow = await loadWorkflowFromFile(filePath);
+    const sourceWorkflow = await loadWorkflowFromFile(filePath);
     const relativePath = filePath.replace(projectRoot + '/', '');
 
     if (dryRun) {
@@ -34,31 +86,27 @@ async function deployWorkflow(
       };
     }
 
-    // Always check if workflow exists by name first (not by ID)
-    // This avoids permission issues in personal spaces where IDs may conflict
+    // Check if workflow exists by name (IDs are NOT in source control)
     const existingWorkflows = await client.listWorkflows();
-    const existingWorkflow = existingWorkflows.find((w) => w.name === workflow.name);
+    const existingWorkflow = existingWorkflows.find((w) => w.name === sourceWorkflow.name);
 
     if (existingWorkflow && existingWorkflow.id) {
-      // Workflow exists in this user's space - update it
-      const oldId = workflow.id;
-      const updated = await client.updateWorkflow(existingWorkflow.id, workflow);
-
-      // Update local file with the correct ID if it changed
-      if (oldId !== existingWorkflow.id) {
-        workflow.id = existingWorkflow.id;
-        const fs = await import('fs/promises');
-        const cleanedWorkflow = cleanWorkflowForSaving(workflow);
-        await fs.writeFile(filePath, JSON.stringify(cleanedWorkflow, null, 2) + '\n', 'utf-8');
-      }
+      // Workflow exists - fetch full details and merge IDs
+      const existingFull = await client.getWorkflow(existingWorkflow.id);
+      
+      // Merge environment-specific IDs from existing into source
+      const workflowToUpdate = mergeIdsFromExisting(sourceWorkflow, existingFull);
+      
+      // Update workflow
+      await client.updateWorkflow(existingFull.id!, workflowToUpdate);
 
       // Update workflow tags if they exist
-      if (workflow.tags && workflow.tags.length > 0) {
+      if (sourceWorkflow.tags && sourceWorkflow.tags.length > 0) {
         const existingTags = await client.listTags();
         const tagNameToId = new Map(existingTags.map((tag) => [tag.name, tag.id]));
 
         const tagIds: string[] = [];
-        for (const tag of workflow.tags) {
+        for (const tag of sourceWorkflow.tags) {
           const tagName = tag.name;
           if (tagNameToId.has(tagName)) {
             tagIds.push(tagNameToId.get(tagName)!);
@@ -68,41 +116,31 @@ async function deployWorkflow(
           }
         }
 
-        await client.updateWorkflowTags(existingWorkflow.id, tagIds);
+        await client.updateWorkflowTags(existingFull.id!, tagIds);
       }
-
-      const message = oldId && oldId !== existingWorkflow.id
-        ? `Updated: ${relativePath} (ID changed: ${oldId} -> ${existingWorkflow.id})`
-        : `Updated: ${relativePath} (ID: ${existingWorkflow.id})`;
 
       return {
         success: true,
-        message,
+        message: `Updated: ${relativePath} (ID: ${existingFull.id})`,
       };
     }
 
     // Workflow doesn't exist - create it as inactive for safety
-    const wasActive = workflow.active === true;
+    // n8n will generate all IDs (workflow, nodes, webhooks, etc.)
+    const workflowToCreate = {
+      ...sourceWorkflow,
+      active: false, // Always create inactive
+    };
     
-    // Force workflow to be inactive when creating
-    workflow.active = false;
-    const created = await client.createWorkflow(workflow);
-
-    // Update local file with new ID
-    workflow.id = created.id;
-    // Restore the original active state in the local file
-    workflow.active = wasActive;
-    const fs = await import('fs/promises');
-    const cleanedWorkflow = cleanWorkflowForSaving(workflow);
-    await fs.writeFile(filePath, JSON.stringify(cleanedWorkflow, null, 2) + '\n', 'utf-8');
+    const created = await client.createWorkflow(workflowToCreate);
 
     // Update workflow tags if they exist
-    if (workflow.tags && workflow.tags.length > 0 && created.id) {
+    if (sourceWorkflow.tags && sourceWorkflow.tags.length > 0 && created.id) {
       const existingTags = await client.listTags();
       const tagNameToId = new Map(existingTags.map((tag) => [tag.name, tag.id]));
 
       const tagIds: string[] = [];
-      for (const tag of workflow.tags) {
+      for (const tag of sourceWorkflow.tags) {
         const tagName = tag.name;
         if (tagNameToId.has(tagName)) {
           tagIds.push(tagNameToId.get(tagName)!);
@@ -115,11 +153,9 @@ async function deployWorkflow(
       await client.updateWorkflowTags(created.id, tagIds);
     }
 
-    // Note: New workflows are created as inactive - user must manually activate in n8n UI
-
     return {
       success: true,
-      message: `Created: ${relativePath} (ID: ${created.id}) [inactive - activate manually in n8n]`,
+      message: `Created: ${relativePath} (ID: ${created.id}) [inactive - manually verify credentials and activate]`,
     };
   } catch (error) {
     const relativePath = filePath.replace(projectRoot + '/', '');

@@ -5,66 +5,71 @@ import { loadConfig } from './config.js';
 
 /**
  * Clean workflow data for storage in source control
- * Removes read-only and frequently changing runtime fields
- * Based on n8n API spec and documentation examples
+ * Removes environment-specific IDs and runtime fields for true multi-environment deployment
+ * 
+ * Architecture:
+ * - Source control contains workflow definitions WITHOUT environment-specific IDs
+ * - On deploy, IDs are either generated (new workflow) or merged from existing workflow (update)
+ * - This allows same workflow source to deploy to dev, staging, prod with different IDs
  */
 export function cleanWorkflowForStorage(workflow: any): any {
-  // Fields to remove (read-only fields per API spec with readOnly: true):
-  // - createdAt, updatedAt: Timestamps managed by n8n (readOnly in API spec)
-  // - versionId: Internal version tracking (not in API spec)
-  // - isArchived: Archive status managed by n8n (not in API spec)
+  // Fields to remove:
+  // Environment-specific IDs (prevent cross-environment conflicts):
+  // - id: Workflow ID is environment-specific
+  // - Node ids: Generated per environment
+  // - webhookId: Generated per environment
+  // - credential ids: Different per environment
   // 
-  // Fields to KEEP (even though they may change):
-  // - id: Required for updates
-  // - active: Part of workflow state (readOnly but indicates desired state)
-  // - staticData: Part of workflow definition (per API docs example)
-  // - settings: Complete workflow settings
-  // - shared: Sharing/project metadata (per API docs example)
-  // - nodes with all properties: webhookId, disabled, notesInFlow, executeOnce, 
-  //   alwaysOutputData, retryOnFail, maxTries, waitBetweenTries, onError, etc.
+  // Read-only/runtime fields:
+  // - createdAt, updatedAt: Timestamps managed by n8n
+  // - versionId, isArchived: Internal tracking
+  // - active: Managed via activation API (new workflows created inactive)
+  // - pinData, triggerCount: Test/debug data
+  // - shared: Environment-specific sharing/project metadata
+  // - staticData: Runtime state that varies per environment
   
   const fieldsToRemove = [
+    'id',           // Environment-specific workflow ID
     'createdAt',    // readOnly timestamp
     'updatedAt',    // readOnly timestamp  
     'versionId',    // Internal version tracking
     'isArchived',   // Archive status
-    'pinData',      // Test/debug data (not in API example)
-    'triggerCount', // Runtime counter (not in API example)
+    'active',       // Activation state (controlled during deploy)
+    'pinData',      // Test/debug data
+    'triggerCount', // Runtime counter
+    'shared',       // Environment-specific sharing metadata
+    'staticData',   // Runtime state varies per environment
   ];
 
   const cleaned = { ...workflow };
   fieldsToRemove.forEach((field) => delete cleaned[field]);
 
-  // Clean up nodes: only remove execution results, keep all configuration
+  // Clean up nodes: remove environment-specific IDs and execution results
   if (cleaned.nodes && Array.isArray(cleaned.nodes)) {
     cleaned.nodes = cleaned.nodes.map((node: any) => {
       const cleanNode = { ...node };
       
-      // Only remove execution results and runtime validation issues
-      // Keep all node configuration fields (webhookId, disabled, retryOnFail, etc.)
+      // Remove environment-specific IDs
+      delete cleanNode.id;        // Node ID is environment-specific
+      delete cleanNode.webhookId; // Webhook ID is environment-specific
+      
+      // Remove credential IDs (keep credential names for reference)
+      if (cleanNode.credentials) {
+        Object.keys(cleanNode.credentials).forEach(credKey => {
+          const cred = cleanNode.credentials[credKey];
+          if (cred && cred.id) {
+            // Keep credential name, remove environment-specific ID
+            cleanNode.credentials[credKey] = { name: cred.name };
+          }
+        });
+      }
+      
+      // Remove execution results and runtime validation
       delete cleanNode.data;   // Execution output data
       delete cleanNode.issues; // Runtime validation issues  
       delete cleanNode.hints;  // Runtime hints/warnings
       
       return cleanNode;
-    });
-  }
-
-  // Normalize shared field - clean up frequently changing user metadata
-  // Keep the structure but remove user details with timestamps
-  if (cleaned.shared && Array.isArray(cleaned.shared)) {
-    cleaned.shared = cleaned.shared.map((share: any) => {
-      const cleanShare: any = {
-        role: share.role,
-        workflowId: share.workflowId,
-        projectId: share.projectId,
-      };
-      // Keep project name if present
-      if (share.project && share.project.name) {
-        cleanShare.project = { name: share.project.name };
-      }
-      // Remove user object with frequently changing timestamps
-      return cleanShare;
     });
   }
 

@@ -8,6 +8,7 @@ import { deployCommand } from './commands/deploy.js';
 import { listCommand } from './commands/list.js';
 import { pullCommand } from './commands/pull.js';
 import { validateCommand } from './commands/validate.js';
+import { diffCommand } from './commands/diff.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,6 +43,7 @@ program.addCommand(deployCommand);
 program.addCommand(listCommand);
 program.addCommand(pullCommand);
 program.addCommand(validateCommand);
+program.addCommand(diffCommand);
 
 // Enhanced help with examples
 program.addHelpText(
@@ -49,6 +51,9 @@ program.addHelpText(
   `
 Examples:
   $ n8n-workflow-cli pull                        # Pull workflows from n8n
+  $ n8n-workflow-cli diff                        # Compare all local and remote workflows
+  $ n8n-workflow-cli diff workflow.json          # Compare specific workflow
+  $ n8n-workflow-cli diff business               # Compare workflows in business category
   $ n8n-workflow-cli validate                    # Validate all workflow files
   $ n8n-workflow-cli deploy workflow.json        # Deploy specific workflow
   $ n8n-workflow-cli deploy --dry-run            # Test deployment without changes

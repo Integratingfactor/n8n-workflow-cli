@@ -58,6 +58,37 @@ n8n-workflow-cli pull
 n8n-workflow-cli pull --category business
 ```
 
+### `diff`
+
+Compare local workflows with remote n8n instance:
+
+```bash
+n8n-workflow-cli diff [workflow]
+```
+
+**Arguments:**
+
+- `workflow` (optional) - Specific workflow file, category, or omit to compare all
+
+**Examples:**
+
+```bash
+# Compare all workflows
+n8n-workflow-cli diff
+
+# Compare specific workflow
+n8n-workflow-cli diff workflows/business/my-workflow.json
+
+# Compare all workflows in a category
+n8n-workflow-cli diff business
+```
+
+**Output:**
+- **Modified**: Workflows that differ between local and remote
+- **Local Only**: Workflows present locally but not in n8n
+- **Remote Only**: Workflows present in n8n but not locally
+- **Identical**: Workflows that match between local and remote
+
 
 ### `deploy`
 
