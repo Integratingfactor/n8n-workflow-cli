@@ -174,7 +174,7 @@ npm run dev -- list
 2. Go to **Settings** → **API**
 3. Click **Create API Key**
 4. Copy the key and store it securely
-5. Set it as an environment variable (recommended) or in your config file
+5. Save it in your workflow project's `.env` file
 
 ## Project Structure
 
@@ -182,11 +182,10 @@ npm run dev -- list
 your-workflow-project/
 ├── n8n.config.json         # Config with categories (committed to repo)
 ├── .env                    # Environment variables (gitignored)
-├── workflows/              # Your workflows
-│   ├── business/
-│   ├── management/
-│   └── shared/
-└── package.json
+└── workflows/              # Your workflows
+    ├── business/
+    ├── management/
+    └── shared/
 ```
 
 ## Tips
