@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2025-10-29
+
+### Fixed
+- **`diff` command**: Now properly detects changes in node parameters, connections, and positions
+  - Added deep comparison of node `parameters` field to catch configuration changes
+  - Added comparison of node connections (wiring changes)
+  - Added comparison of node positions (layout changes)
+  - Improved diff output messages for clarity
+
+### Changed
+- **Workflow Development Guide**: Streamlined documentation from 883 to 306 lines
+  - Removed duplicate content
+  - Improved readability and flow
+  - Focused on SFDX-inspired workflow
+
 ## [1.2.0] - 2025-10-26 - Multi-environment architecture and diff command
 
 ### Added

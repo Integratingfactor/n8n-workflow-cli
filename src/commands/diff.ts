@@ -64,26 +64,48 @@ function compareWorkflows(local: any, remote: any): string[] {
         const remoteNode: any = remoteNodeMap.get(name);
         
         if (localNode.type !== remoteNode.type) {
-          differences.push(`Node "${name}" type: ${localNode.type} vs ${remoteNode.type}`);
+          differences.push(`Node "${name}" type changed: ${localNode.type} → ${remoteNode.type}`);
         }
         if (localNode.disabled !== remoteNode.disabled) {
-          differences.push(`Node "${name}" disabled: ${localNode.disabled} vs ${remoteNode.disabled}`);
+          differences.push(`Node "${name}" disabled changed: ${localNode.disabled} → ${remoteNode.disabled}`);
         }
-        // Could add more detailed parameter comparison here
+        
+        // Compare node parameters (the actual configuration)
+        const localParams = JSON.stringify(localNode.parameters || {});
+        const remoteParams = JSON.stringify(remoteNode.parameters || {});
+        if (localParams !== remoteParams) {
+          differences.push(`Node "${name}" parameters changed`);
+        }
+        
+        // Compare node position (helpful for layout changes)
+        const localPos = JSON.stringify(localNode.position);
+        const remotePos = JSON.stringify(remoteNode.position);
+        if (localPos !== remotePos) {
+          differences.push(`Node "${name}" position changed`);
+        }
       }
     });
   }
 
+  // Compare connections
+  const localConnections = JSON.stringify(local.connections || {});
+  const remoteConnections = JSON.stringify(remote.connections || {});
+  if (localConnections !== remoteConnections) {
+    differences.push('Node connections changed');
+  }
+
   // Compare settings
-  if (JSON.stringify(local.settings) !== JSON.stringify(remote.settings)) {
-    differences.push('Settings differ');
+  const localSettings = JSON.stringify(local.settings || {});
+  const remoteSettings = JSON.stringify(remote.settings || {});
+  if (localSettings !== remoteSettings) {
+    differences.push('Workflow settings changed');
   }
 
   // Compare tags
   const localTags = local.tags?.map((t: any) => t.name).sort() || [];
   const remoteTags = remote.tags?.map((t: any) => t.name).sort() || [];
   if (JSON.stringify(localTags) !== JSON.stringify(remoteTags)) {
-    differences.push(`Tags: [${localTags.join(', ')}] vs [${remoteTags.join(', ')}]`);
+    differences.push(`Tags changed: [${localTags.join(', ')}] → [${remoteTags.join(', ')}]`);
   }
 
   return differences;
