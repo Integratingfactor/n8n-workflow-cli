@@ -1,6 +1,35 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { Config, Workflow, WorkflowListResponse } from './types.js';
 
+function isHtmlResponse(data: unknown, headers?: Record<string, unknown>): boolean {
+  const ct = (headers?.['content-type'] || headers?.['Content-Type']) as string | undefined;
+  if (ct && ct.includes('text/html')) return true;
+  return typeof data === 'string' && data.includes('<!DOCTYPE html>');
+}
+
+function validateApiUrl(apiUrl: string): string | null {
+  try {
+    const u = new URL(apiUrl);
+
+    // Must end with /api/v1 (no UI paths like /home/workflows)
+    if (!u.pathname.endsWith('/api/v1')) return 'N8N_API_URL must end with "/api/v1".';
+
+    // Disallow common UI path leak
+    if (u.pathname.includes('/home/workflows')) {
+      return 'N8N_API_URL should not contain UI paths like "/home/workflows".';
+    }
+
+    // Most common mistake: using the login host instead of your workspace
+    if (u.hostname === 'app.n8n.cloud') {
+      return 'N8N_API_URL must use your workspace subdomain (e.g., https://<workspace>.n8n.cloud/api/v1), not https://app.n8n.cloud/api/v1.';
+    }
+  } catch {
+    return 'N8N_API_URL is not a valid URL.';
+  }
+  return null;
+}
+
+
 export class N8nApiError extends Error {
   constructor(
     message: string,
@@ -16,6 +45,13 @@ export class N8nClient {
   private client: AxiosInstance;
 
   constructor(private config: Config) {
+    const urlError = validateApiUrl(config.N8N_API_URL);
+    if (urlError) {
+      throw new N8nApiError(
+        `${urlError} Example: https://<your-workspace>.n8n.cloud/api/v1`,
+      );
+    }
+
     this.client = axios.create({
       baseURL: config.N8N_API_URL,
       headers: {
@@ -31,9 +67,26 @@ export class N8nClient {
       (response) => response,
       (error: AxiosError) => {
         if (error.response) {
-          const message = error.response.data ? JSON.stringify(error.response.data) : error.message;
-          throw new N8nApiError(`n8n API error: ${message}`, error.response.status, error);
-        } else if (error.request) {
+          const { data, headers, status } = error.response;
+        
+          // If the server returned HTML, the user is almost certainly hitting the UI, not the API.
+          if (isHtmlResponse(data, headers)) {
+            throw new N8nApiError(
+              [
+                'It looks like N8N_API_URL points to the web UI (HTML) instead of the REST API.',
+                'Make sure your URL ends with "/api/v1" and uses your workspace subdomain.',
+                'Example: https://<your-workspace>.n8n.cloud/api/v1',
+              ].join(' '),
+              status,
+              error,
+            );
+          }
+        
+          // Otherwise, surface the JSON/API error normally.
+          const msg = typeof data === 'string' ? data : JSON.stringify(data);
+          throw new N8nApiError(`n8n API error: ${msg}`, status, error);
+        }
+         else if (error.request) {
           throw new N8nApiError(
             `No response from n8n API. Check your N8N_API_URL: ${this.config.N8N_API_URL}`,
             undefined,
